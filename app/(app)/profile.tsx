@@ -175,6 +175,12 @@ export default function ProfileScreen() {
       {/* Actions */}
       <View style={styles.actions}>
         <Pressable
+          style={[styles.button, styles.verifyButton]}
+          onPress={() => router.push('/(app)/get-verified' as any)}
+        >
+          <Text style={styles.buttonText}>Get Verified</Text>
+        </Pressable>
+        <Pressable
           style={styles.button}
           onPress={() => router.push('/(app)/change-password' as any)}
         >
@@ -280,6 +286,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     alignItems: 'center',
   },
+  verifyButton: { backgroundColor: colors.accent },
   buttonText: { color: colors.textPrimary, fontSize: typography.body, fontWeight: '600' },
   dangerButton: { backgroundColor: 'transparent', borderWidth: 1, borderColor: colors.danger },
   dangerButtonText: { color: colors.danger },

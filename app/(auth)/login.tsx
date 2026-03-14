@@ -39,6 +39,7 @@ export default function LoginScreen() {
     setError('');
     try {
       await login(username.trim(), password);
+      router.replace('/(app)/dashboard' as any);
     } catch (err: any) {
       const msg = err?.response?.data?.problems?.[0]?.messageDetails
         || err?.response?.data?.problems?.[0]?.message

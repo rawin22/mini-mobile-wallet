@@ -5,6 +5,7 @@ import {
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
+import * as Clipboard from 'expo-clipboard';
 import { useAuth } from '../../src/hooks/useAuth';
 import {
   verificationService,
@@ -52,6 +53,11 @@ export default function GetVerifiedScreen() {
   const [frontFileId, setFrontFileId] = useState('');
   const [selfieFileId, setSelfieFileId] = useState('');
 
+  // VLink result shown on done screen
+  const [vlinkId, setVlinkId] = useState('');
+  const [vlinkReference, setVlinkReference] = useState('');
+  const [vlinkUrl, setVlinkUrl] = useState('');
+
   // Form data (OCR pre-filled from front upload)
   const [form, setForm] = useState<VerificationFormData>(emptyForm);
 
@@ -66,6 +72,9 @@ export default function GetVerifiedScreen() {
 
   const set = (field: keyof VerificationFormData) => (value: string | number) =>
     setForm((prev) => ({ ...prev, [field]: value }));
+
+  // In GPWeb, the customerId is the organizationId from user settings
+  const resolvedCustomerId = user?.organizationId ?? '';
 
   // Load countries when entering step 3
   useEffect(() => {
@@ -124,33 +133,42 @@ export default function GetVerifiedScreen() {
     return result.assets[0].base64;
   };
 
+  const extractApiError = (err: unknown): string => {
+    if (err instanceof VerificationError) return err.message;
+    const data = (err as any)?.response?.data;
+    if (data?.problems?.[0]?.messageDetails) return data.problems[0].messageDetails;
+    if (data?.problems?.[0]?.message) return data.problems[0].message;
+    return 'Upload failed. Please try again.';
+  };
+
   const handleUploadIdFront = async (source: 'camera' | 'library') => {
     setError('');
-    const customerId = user?.customerId;
+    const customerId = resolvedCustomerId;
     if (!customerId) { setError('User customer ID not found. Please log in again.'); return; }
 
     const base64 = await pickImage(source, false);
     if (!base64) return;
 
     setUploading(true);
+    console.log('[KYC] Uploading ID front, customerId:', customerId);
     try {
       const result = await verificationService.uploadFile({
         ParentObjectId: customerId,
-        ParentObjectTypeId: 1,
-        SourceIP: '0.0.0.0',
+        ParentObjectTypeId: 21,
+        SourceIP: '',
         FileAttachmentTypeId: FileAttachmentTypeId.ProofOfIdentityFront,
         FileAttachmentSubTypeId: 0,
         SumSubTypeId: 0,
         FileName: `id_front_${Date.now()}.jpg`,
-        GroupName: 'GetVerified',
+        GroupName: '',
         Properties: null,
         IsPrimary: true,
         ContainsFront: true,
         ContainsBack: false,
         ViewableByBanker: true,
         ViewableByCustomer: true,
-        DeletableByCustomer: true,
-        Description: 'Proof of Identity - Front',
+        DeletableByCustomer: false,
+        Description: 'documentType: Proof of Identity',
         BypassFileAnalysis: false,
         FileData: base64,
       });
@@ -177,8 +195,7 @@ export default function GetVerifiedScreen() {
 
       setStep('selfie');
     } catch (err) {
-      const msg = err instanceof VerificationError ? err.message : 'Upload failed. Please try again.';
-      setError(msg);
+      setError(extractApiError(err));
     } finally {
       setUploading(false);
     }
@@ -186,7 +203,7 @@ export default function GetVerifiedScreen() {
 
   const handleUploadSelfie = async (source: 'camera' | 'library') => {
     setError('');
-    const customerId = user?.customerId;
+    const customerId = resolvedCustomerId;
     if (!customerId) { setError('User customer ID not found.'); return; }
 
     const base64 = await pickImage(source, source === 'camera');
@@ -196,20 +213,20 @@ export default function GetVerifiedScreen() {
     try {
       const result = await verificationService.uploadFile({
         ParentObjectId: customerId,
-        ParentObjectTypeId: 1,
-        SourceIP: '0.0.0.0',
+        ParentObjectTypeId: 21,
+        SourceIP: '',
         FileAttachmentTypeId: FileAttachmentTypeId.SelfiePhoto,
         FileAttachmentSubTypeId: 0,
         SumSubTypeId: 0,
         FileName: `selfie_${Date.now()}.jpg`,
-        GroupName: 'GetVerified',
+        GroupName: '',
         Properties: null,
         IsPrimary: true,
         ContainsFront: false,
         ContainsBack: false,
         ViewableByBanker: true,
         ViewableByCustomer: true,
-        DeletableByCustomer: true,
+        DeletableByCustomer: false,
         Description: 'Selfie Photo',
         BypassFileAnalysis: false,
         FileData: base64,
@@ -219,8 +236,7 @@ export default function GetVerifiedScreen() {
       setSelfieFileId(result.FileAttachmentId);
       setStep('details');
     } catch (err) {
-      const msg = err instanceof VerificationError ? err.message : 'Upload failed. Please try again.';
-      setError(msg);
+      setError(extractApiError(err));
     } finally {
       setUploading(false);
     }
@@ -239,8 +255,8 @@ export default function GetVerifiedScreen() {
     const validationError = validateDetails();
     if (validationError) { setError(validationError); return; }
 
-    const customerId = user?.customerId;
-    const userId = user?.userId;
+    const customerId = resolvedCustomerId;
+    const userId = user?.userId ?? (user as any)?.UserId ?? '';
     const userName = user?.userName ?? '';
     const fullName = `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim();
 
@@ -250,14 +266,17 @@ export default function GetVerifiedScreen() {
     setStep('submitting');
 
     try {
+      const customerName = fullName || userName;
+      const verifyUrl = `https://fx.worldkyc.com/verify/${customerId}`;
+
       // 1. Create verified link
       const vlink = await verificationService.createVerifiedLink({
-        VerifiedLinkTypeId: 4,
-        VerifiedLinkName: `GetVerified - ${userName}`,
+        VerifiedLinkTypeId: 3,
+        VerifiedLinkName: customerName,
         CustomerId: customerId,
-        GroupName: 'GetVerified',
-        MinimumWKYCLevel: 1,
-        Message: '',
+        GroupName: '',
+        MinimumWKYCLevel: 0,
+        Message: `Identity verification request for ${customerName}`,
         PublicMessage: '',
         BlockchainMessage: '',
         SharedWithName: '',
@@ -266,26 +285,76 @@ export default function GetVerifiedScreen() {
         VerifiedLinkShortUrl: '',
         SelectedAccountAlias: '',
         ShareAccountAlias: false,
-        ShareBirthCity: false,
-        ShareBirthCountry: false,
-        ShareBirthDate: false,
+        ShareBirthCity: true,
+        ShareBirthCountry: true,
+        ShareBirthDate: true,
         ShareFirstName: true,
-        ShareMiddleName: false,
+        ShareMiddleName: true,
         ShareLastName: true,
-        ShareGender: false,
-        ShareNationality: false,
-        ShareIdExpirationDate: false,
-        ShareIdNumber: false,
-        ShareIdType: false,
+        ShareGender: true,
+        ShareNationality: true,
+        ShareIdExpirationDate: true,
+        ShareIdNumber: true,
+        ShareIdType: true,
         ShareIdFront: true,
-        ShareIdBack: false,
+        ShareIdBack: true,
         ShareSelfie: true,
         IsPrimary: true,
       });
 
       console.log('[KYC] VLink created:', vlink.VerifiedLinkId, vlink.VerifiedLinkReference);
 
-      // 2. Build description and attach metadata to ID front file
+      // 2. Update VLink with the verify URL and all share settings
+      const vlinkVerifyUrl = `https://fx.worldkyc.com/verify/${vlink.VerifiedLinkReference}`;
+      await verificationService.updateVerifiedLink({
+        VerifiedLinkId: vlink.VerifiedLinkId,
+        VerifiedLinkTypeId: 3,
+        VerifiedLinkName: customerName,
+        GroupName: '',
+        MinimumWKYCLevel: 0,
+        Message: `Identity verification request for ${customerName}`,
+        PublicMessage: '',
+        BlockchainMessage: '',
+        SharedWithName: '',
+        WebsiteUrl: '',
+        VerifiedLinkUrl: vlinkVerifyUrl,
+        VerifiedLinkShortUrl: vlinkVerifyUrl,
+        SelectedAccountAlias: '',
+        AgeConfirmOver: 0,
+        AgeConfirmUnder: 0,
+        ShareAccountAlias: false,
+        ShareBirthCity: true,
+        ShareBirthCountry: true,
+        ShareBirthDate: true,
+        ShareFirstName: true,
+        ShareMiddleName: true,
+        ShareLastName: true,
+        ShareGlobalFirstName: false,
+        ShareGlobalMiddleName: false,
+        ShareGlobalLastName: false,
+        ShareGender: true,
+        ShareNationality: true,
+        ShareSuffix: false,
+        ShareIdExpirationDate: true,
+        ShareIdNumber: true,
+        ShareIdType: true,
+        ShareIdFront: true,
+        ShareIdBack: true,
+        ShareSelfie: true,
+        ShareAgeConfirmOver: false,
+        ShareAgeConfirmUnder: false,
+        AdditionalData: '',
+        IsWalletLocked: false,
+        WalletAddress: '',
+        TokenId: '',
+        NFTReference: '',
+        NFTChain: '',
+        IsPrimary: true,
+      });
+
+      console.log('[KYC] VLink updated with URL:', vlinkVerifyUrl);
+
+      // 3. Attach metadata to ID front file
       const baseDesc = buildIdDescription(form);
       const fullDesc = appendVerificationMetadata(
         baseDesc,
@@ -298,15 +367,18 @@ export default function GetVerifiedScreen() {
 
       await verificationService.updateFileAttachment({
         FileAttachmentId: frontFileId,
-        GroupName: 'GetVerified',
+        GroupName: '',
         FileAttachmentTypeId: FileAttachmentTypeId.ProofOfIdentityFront,
         ViewableByBanker: true,
         ViewableByCustomer: true,
-        DeletableByCustomer: true,
+        DeletableByCustomer: false,
         Description: fullDesc,
       });
 
       console.log('[KYC] File attachment updated with metadata');
+      setVlinkId(vlink.VerifiedLinkId);
+      setVlinkReference(vlink.VerifiedLinkReference);
+      setVlinkUrl(vlinkVerifyUrl);
       setStep('done');
     } catch (err) {
       const msg = err instanceof VerificationError ? err.message : 'Submission failed. Please try again.';
@@ -579,16 +651,36 @@ export default function GetVerifiedScreen() {
 
   // ─── Step: Done ───────────────────────────────────────────────────────────
   return (
-    <View style={styles.centered}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.doneIcon}>✅</Text>
       <Text style={styles.doneTitle}>Verification Submitted</Text>
       <Text style={styles.doneDesc}>
-        Your documents have been submitted for review. You will be notified once verification is complete.
+        Your documents have been submitted for review. Share your verification link with the verifier.
       </Text>
-      <Pressable style={styles.submitBtn} onPress={() => router.replace('/(app)/dashboard' as any)}>
-        <Text style={styles.submitBtnText}>Go to Dashboard</Text>
+
+      <View style={styles.card}>
+        <Text style={styles.sectionTitle}>Your Verification Link</Text>
+
+        <Text style={styles.label}>Reference</Text>
+        <Pressable style={styles.copyRow} onPress={() => Clipboard.setStringAsync(vlinkReference)}>
+          <Text style={styles.copyValue}>{vlinkReference}</Text>
+          <Text style={styles.copyBtn}>Copy</Text>
+        </Pressable>
+
+        <Text style={styles.label}>Verify URL</Text>
+        <Pressable style={styles.copyRow} onPress={() => Clipboard.setStringAsync(vlinkUrl)}>
+          <Text style={styles.copyValue} numberOfLines={2}>{vlinkUrl}</Text>
+          <Text style={styles.copyBtn}>Copy</Text>
+        </Pressable>
+      </View>
+
+      <Pressable style={styles.submitBtn} onPress={() => router.replace('/(app)/profile' as any)}>
+        <Text style={styles.submitBtnText}>View in Profile</Text>
       </Pressable>
-    </View>
+      <Pressable style={styles.backBtn} onPress={() => router.replace('/(app)/dashboard' as any)}>
+        <Text style={styles.backBtnText}>Go to Dashboard</Text>
+      </Pressable>
+    </ScrollView>
   );
 }
 
@@ -696,7 +788,20 @@ const styles = StyleSheet.create({
   },
   submittingText: { fontSize: typography.body, color: colors.textSecondary, marginTop: spacing.md },
 
-  doneIcon: { fontSize: 64, marginBottom: spacing.md },
+  doneIcon: { fontSize: 64, textAlign: 'center', marginBottom: spacing.md, marginTop: spacing.xl },
   doneTitle: { fontSize: typography.heading, fontWeight: 'bold', color: colors.textPrimary, marginBottom: spacing.sm, textAlign: 'center' },
-  doneDesc: { fontSize: typography.small, color: colors.textSecondary, textAlign: 'center', marginBottom: spacing.xl },
+  doneDesc: { fontSize: typography.small, color: colors.textSecondary, textAlign: 'center', marginBottom: spacing.lg },
+
+  copyRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surfaceAlt,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    padding: spacing.sm,
+    marginBottom: spacing.xs,
+  },
+  copyValue: { flex: 1, fontSize: typography.caption, color: colors.textPrimary, marginRight: spacing.sm },
+  copyBtn: { fontSize: typography.caption, color: colors.primary, fontWeight: '700' },
 });

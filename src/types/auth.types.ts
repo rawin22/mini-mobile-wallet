@@ -28,7 +28,7 @@ export interface UserSettings {
   isLockedOut: boolean;
   passwordRegEx?: string;
   passwordRegExMessage?: string;
-  customerId?: string;
+  customerId?: string; // not returned by API — use organizationId instead
   customerWKYCLevel?: number;
   customerTrustScore?: number;
   phone?: string;

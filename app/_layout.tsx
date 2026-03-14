@@ -15,12 +15,12 @@ function AuthGate() {
   useEffect(() => {
     if (isLoading) return;
     const inAuthGroup = (segments[0] as string) === '(auth)';
+    // Only redirect unauthenticated users to login. Authenticated redirects
+    // (login → dashboard, signup → get-verified) are handled by each screen
+    // individually to avoid racing with post-signup navigation.
     if (!isAuthenticated && !inAuthGroup) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       router.replace('/(auth)/login' as any);
-    } else if (isAuthenticated && inAuthGroup) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      router.replace('/(app)/dashboard' as any);
     }
   }, [isAuthenticated, isLoading, segments, router]);
 
