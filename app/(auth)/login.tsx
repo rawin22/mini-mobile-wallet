@@ -3,6 +3,7 @@ import {
   ActivityIndicator, KeyboardAvoidingView, Platform, Modal, FlatList,
 } from 'react-native';
 import { useState } from 'react';
+import { useRouter } from 'expo-router';
 import { useAuth } from '../../src/hooks/useAuth';
 import {
   getEnvironmentOptions, getActiveEnvironmentId,
@@ -11,6 +12,7 @@ import {
 import { colors, spacing, typography, radius } from '../../src/theme';
 
 export default function LoginScreen() {
+  const router = useRouter();
   const { login } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -96,6 +98,12 @@ export default function LoginScreen() {
               : <Text style={styles.buttonText}>Sign In</Text>
             }
           </Pressable>
+
+          <Pressable style={styles.signupLink} onPress={() => router.push('/(auth)/signup' as any)}>
+            <Text style={styles.signupLinkText}>
+              Don't have an account? <Text style={styles.signupLinkBold}>Sign up</Text>
+            </Text>
+          </Pressable>
         </View>
       </View>
 
@@ -158,6 +166,10 @@ const styles = StyleSheet.create({
     padding: spacing.md, alignItems: 'center', marginTop: spacing.sm,
   },
   buttonText: { color: colors.textPrimary, fontSize: typography.body, fontWeight: '600' },
+  signupLink: { alignItems: 'center', marginTop: spacing.md },
+  signupLinkText: { fontSize: typography.small, color: colors.textSecondary },
+  signupLinkBold: { color: colors.primary, fontWeight: '600' },
+
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', padding: spacing.xl },
   modal: { backgroundColor: colors.surface, borderRadius: radius.lg, overflow: 'hidden' },
   modalTitle: { fontSize: typography.body, fontWeight: 'bold', color: colors.textPrimary, padding: spacing.md, borderBottomWidth: 1, borderBottomColor: colors.border },
