@@ -1,0 +1,383 @@
+{
+    "common": {
+        "loading": "Loading...",
+        "back": "Back",
+        "cancel": "Cancel",
+        "custom": "Custom",
+        "fetch": "Fetch",
+        "retry": "Retry",
+        "to": "to",
+        "language": "Language",
+        "light": "Light",
+        "dark": "Dark"
+    },
+    "nav": {
+        "dashboard": "Dashboard",
+        "payNow": "Pay Now",
+        "exchange": "Exchange",
+        "help": "Help",
+        "history": "History",
+        "payments": "Payments",
+        "exchanges": "Exchanges",
+        "getVerified": "Get Verified",
+        "profile": "Profile",
+        "changePassword": "Change Password",
+        "logout": "Log Out",
+        "toggleSidebar": "Toggle sidebar",
+        "toggleMobileMenu": "Toggle mobile menu",
+        "toggleTheme": "Toggle theme",
+        "userMenu": "User menu"
+    },
+    "auth": {
+        "toggleTheme": "Toggle theme",
+        "subtitle": "Sign in to your wallet",
+        "username": "Username",
+        "password": "Password",
+        "confirmPassword": "Confirm Password",
+        "email": "Email",
+        "cellphone": "Cellphone",
+        "environment": "Environment",
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "referredBy": "Referred By",
+        "notaryNode": "Notary Node",
+        "enterUsername": "Enter your username",
+        "enterPassword": "Enter your password",
+        "hidePassword": "Hide password",
+        "showPassword": "Show password",
+        "signIn": "Sign In",
+        "signingIn": "Signing in...",
+        "newUser": "New user?",
+        "createAccount": "Create an account",
+        "alreadyAccount": "Already have an account?",
+        "backToLogin": "Back to Login",
+        "signupTitle": "Sign Up with Us",
+        "signupSubtitle": "Create your account",
+        "submit": "Submit",
+        "submitting": "Submitting...",
+        "loginFailed": "Login failed. Please check your credentials.",
+        "passwordMismatch": "Password and Confirm Password must match.",
+        "passwordPolicyFailed": "Password does not meet security requirements.",
+        "referredByRequired": "Referred By is required.",
+        "signupConfigError": "Unable to load signup configuration. Please try again.",
+        "missingBankCredentials": "Signup is not configured. Please set VITE_BANK_USERNAME and VITE_BANK_PASSWORD in .env.",
+        "usernameExists": "Username already exists. Please choose a different username.",
+        "signupSuccess": "Account successfully created.",
+        "signupFailed": "Signup failed. Please try again.",
+        "notary": {
+            "sx": "WinstantGold SX - Sint Maarten",
+            "us": "WinstantGold US - United States",
+            "eu": "WinstantGold EU - Europe"
+        }
+    },
+    "dashboard": {
+        "welcome": "Welcome, {{name}}",
+        "hideZero": "Hide zero balances",
+        "loadingBalances": "Loading balances...",
+        "loadError": "Failed to load balances. Please try again.",
+        "noBalances": "No balances to display.",
+        "available": "Available",
+        "reserved": "Reserved",
+        "total": "Total",
+        "viewStatement": "View Statement →"
+    },
+    "statement": {
+        "title": "Account Statement",
+        "days": "{{days}} days",
+        "all": "All",
+        "loading": "Loading statement...",
+        "loadError": "Failed to load statement.",
+        "account": "Account",
+        "opening": "Opening",
+        "closing": "Closing",
+        "noTransactions": "No transactions found for this period.",
+        "date": "Date",
+        "type": "Type",
+        "description": "Description",
+        "debit": "Debit",
+        "credit": "Credit",
+        "balance": "Balance",
+        "totalDebits": "Total Debits",
+        "totalCredits": "Total Credits",
+        "netChange": "Net Change"
+    },
+    "payment": {
+        "title": "Instant Payment",
+        "receiverPayId": "Receiver PayID",
+        "receiverPlaceholder": "Enter receiver's PayID",
+        "amount": "Amount",
+        "currency": "Currency",
+        "memoOptional": "Memo (optional)",
+        "memoPlaceholder": "Payment note",
+        "reviewPayment": "Review Payment",
+        "reviewSend": "Review & Send",
+        "sendPayment": "Send Payment",
+        "processing": "Processing...",
+        "successTitle": "Payment Sent!",
+        "reference": "Reference",
+        "sendAnother": "Send Another",
+        "viewHistory": "View History",
+        "instantReason": "Instant Payment",
+        "to": "To",
+        "failed": "Failed to send payment. Please try again."
+    },
+    "fx": {
+        "title": "FX Exchange",
+        "buyCurrencies": "Buy Currencies",
+        "sellCurrencies": "Sell Currencies",
+        "buyCurrency": "Buy Currency",
+        "sellCurrency": "Sell Currency",
+        "amount": "Amount",
+        "amountCurrency": "Amount Currency",
+        "getQuote": "Get Quote",
+        "requestingQuote": "Requesting quote...",
+        "quoteTitle": "FX Quote",
+        "expiresIn": "Expires in {{time}}",
+        "symbol": "Symbol",
+        "rate": "Rate",
+        "buy": "Buy",
+        "sell": "Sell",
+        "dealType": "Deal Type",
+        "valueDate": "Value Date",
+        "bookDeal": "Book Deal",
+        "booking": "Booking deal...",
+        "expiredTitle": "Quote Expired",
+        "expiredBody": "The quote has expired. Please request a new one.",
+        "newQuote": "Get New Quote",
+        "successTitle": "Deal Booked!",
+        "dealReference": "Deal Reference",
+        "depositReference": "Deposit Reference",
+        "bought": "Bought",
+        "sold": "Sold",
+        "newExchange": "New Exchange",
+        "viewHistory": "View History",
+        "loadCurrenciesError": "Failed to load currencies.",
+        "quoteError": "Failed to get quote. Please try again.",
+        "bookError": "Failed to book deal. Please try again.",
+        "booked": "Booked"
+    },
+    "history": {
+        "paymentsTitle": "Payment History",
+        "paymentsLoadError": "Failed to load payment history.",
+        "noPayments": "No payments found.",
+        "exchangeTitle": "Exchange History",
+        "exchangeLoadError": "Failed to load exchange history.",
+        "noDeals": "No FX deals found.",
+        "date": "Date",
+        "reference": "Reference",
+        "from": "From",
+        "to": "To",
+        "amount": "Amount",
+        "status": "Status",
+        "sell": "Sell",
+        "buy": "Buy",
+        "rate": "Rate",
+        "booked": "Booked",
+        "valueDate": "Value Date"
+    },
+    "verification": {
+        "title": "Get Verified",
+        "loading": "Loading verification status...",
+        "loadError": "Failed to load verification data. Please try again.",
+        "alreadyVerifiedTitle": "You Are Verified",
+        "alreadyVerifiedMessage": "Your identity has already been verified. No further action is needed.",
+        "step1Label": "ID Document",
+        "step2Label": "Selfie",
+        "step3Label": "Review",
+        "step4Label": "Done",
+        "step1Title": "Upload ID Document",
+        "step1Hint": "Select your country and ID type, then upload the front (and back if required) of your identification document.",
+        "step2Title": "Upload Selfie",
+        "step2Hint": "Take or upload a clear selfie photo for identity verification.",
+        "step3Title": "Review & Submit",
+        "step3Hint": "Review the extracted information below. Correct any errors before submitting your verification request.",
+        "step4Title": "Verification Submitted",
+        "step4Hint": "Your verification request has been submitted successfully. You will be notified once it is reviewed.",
+        "countryOfIssuance": "Country of Issuance",
+        "selectCountry": "Select country...",
+        "idType": "ID Type",
+        "selectIdType": "Select ID type...",
+        "frontFile": "Front of Document",
+        "backFile": "Back of Document",
+        "selfieFile": "Selfie Photo",
+        "idNumber": "ID Number",
+        "issuerName": "Issuer Name",
+        "firstName": "First Name",
+        "middleName": "Middle Name",
+        "lastName": "Last Name",
+        "nationality": "Nationality",
+        "dateOfBirth": "Date of Birth",
+        "placeOfBirth": "Place of Birth",
+        "gender": "Gender",
+        "genderNA": "N/A",
+        "genderMale": "Male",
+        "genderFemale": "Female",
+        "issuanceDate": "Issuance Date",
+        "expirationDate": "Expiration Date",
+        "uploading": "Uploading...",
+        "submitting": "Submitting...",
+        "uploadDocuments": "Upload Documents",
+        "uploadSelfie": "Upload Selfie",
+        "submitVerification": "Submit Verification",
+        "uploadIdError": "Failed to upload ID document. Please try again.",
+        "uploadSelfieError": "Failed to upload selfie. Please try again.",
+        "submitError": "Failed to submit verification. Please try again.",
+        "invalidFileType": "Invalid file type. Only JPG and PNG images are accepted.",
+        "openCamera": "Open Camera",
+        "capture": "Take Photo",
+        "retake": "Retake",
+        "orUploadFile": "or upload a file",
+        "cameraError": "Could not access camera. Please check permissions or upload a file instead.",
+        "referenceNumber": "Reference Number",
+        "verificationId": "Verification ID",
+        "copy": "Copy",
+        "submittedDetails": "Submitted Details",
+        "startOver": "Start over with new documents",
+        "startNewVerification": "Submit New ID Document",
+        "resetWarning": "Warning: This will delete your current ID documents and selfie. Your verification level (WKYC) will be reset to Level 0. You will need to upload new documents and re-submit for verification.",
+        "confirmReset": "Yes, Reset and Start Over",
+        "resetting": "Resetting..."
+    },
+    "profile": {
+        "title": "Profile",
+        "accountInfo": "Account",
+        "personalInfo": "Personal",
+        "verification": "Verification",
+        "settings": "Settings",
+        "status": "Status",
+        "username": "Username",
+        "email": "Email",
+        "phone": "Phone",
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "organization": "Organization",
+        "branch": "Branch",
+        "wkycLevel": "WKYC Level",
+        "trustScore": "Trust Score",
+        "wkycId": "WKYC ID",
+        "baseCurrency": "Base Currency",
+        "language": "Language / Culture",
+        "enabled": "Enabled",
+        "lockedOut": "Locked Out",
+        "lastLogin": "Last Login",
+        "lastPasswordChange": "Last Password Change",
+        "yes": "Yes",
+        "no": "No",
+        "changePassword": "Change Password",
+        "changePasswordTitle": "Change Password",
+        "currentPassword": "Current Password",
+        "newPassword": "New Password",
+        "confirmNewPassword": "Confirm New Password",
+        "allFieldsRequired": "All fields are required.",
+        "changingPassword": "Changing...",
+        "passwordChanged": "Your password has been changed successfully.",
+        "changePasswordError": "Failed to change password. Please try again.",
+        "backToProfile": "Back to Profile",
+        "verifiedLinks": "Verified Links",
+        "noVlinks": "No verified links found.",
+        "vlinkReference": "Reference",
+        "vlinkName": "Name",
+        "vlinkStatus": "Status",
+        "vlinkUrl": "VLink URL"
+    },
+    "help": {
+        "title": "Help Center",
+        "subtitle": "Quick guidance for the main wallet flows. Update this file to maintain labels and help content in one place.",
+        "searchPlaceholder": "Search help topics...",
+        "searchAria": "Search help topics",
+        "noResults": "No help topics match \"{{query}}\".",
+        "sections": {
+            "gettingStarted": {
+                "title": "Getting Started",
+                "intro": "Use these first steps when a user opens the app for the first time.",
+                "items": {
+                    "signIn": {
+                        "label": "Sign in",
+                        "description": "Use your username and password on the login page. If you are new, create an account first from the sign-up page."
+                    },
+                    "pickTheme": {
+                        "label": "Pick a theme",
+                        "description": "Use the Light/Dark switch on login or sign-up. Your theme preference is saved automatically."
+                    },
+                    "openDashboard": {
+                        "label": "Open dashboard",
+                        "description": "After sign in, you land on Dashboard where all balances are shown by currency account."
+                    }
+                }
+            },
+            "dashboard": {
+                "title": "Dashboard",
+                "items": {
+                    "hideZero": {
+                        "label": "Hide zero balances",
+                        "description": "Use the checkbox in the top-right to only show accounts with non-zero available/total values."
+                    },
+                    "viewStatement": {
+                        "label": "View statement",
+                        "description": "Click any account card to open its statement with transaction history and date filters."
+                    }
+                }
+            },
+            "payments": {
+                "title": "Pay Now",
+                "items": {
+                    "createPayment": {
+                        "label": "Create payment",
+                        "description": "Enter recipient PayID, amount, and currency, then continue to review before sending."
+                    },
+                    "reviewConfirm": {
+                        "label": "Review and confirm",
+                        "description": "Confirm details carefully. Once posted, payment status and reference appear in Payment History."
+                    }
+                }
+            },
+            "exchange": {
+                "title": "Exchange (FX)",
+                "items": {
+                    "getQuote": {
+                        "label": "Get quote",
+                        "description": "Select buy/sell currencies and amount, then request a quote."
+                    },
+                    "quoteExpiry": {
+                        "label": "Quote expiry",
+                        "description": "Quotes have a countdown timer. If it expires, request a new quote before booking."
+                    },
+                    "bookDeal": {
+                        "label": "Book deal",
+                        "description": "Book the quote to complete exchange and generate references visible in Exchange History."
+                    }
+                }
+            },
+            "history": {
+                "title": "History",
+                "items": {
+                    "paymentHistory": {
+                        "label": "Payment History",
+                        "description": "See sent payment records with date/time, reference, parties, amount, and status."
+                    },
+                    "exchangeHistory": {
+                        "label": "Exchange History",
+                        "description": "See booked FX deals, rates, conversion values, and value dates."
+                    }
+                }
+            },
+            "support": {
+                "title": "Troubleshooting",
+                "items": {
+                    "cantSignIn": {
+                        "label": "Can't sign in",
+                        "description": "Check username/password carefully and verify API availability. Try again after a few seconds."
+                    },
+                    "pageNotFound": {
+                        "label": "Page not found after deploy",
+                        "description": "Ensure staticwebapp.config.json exists in the deployed artifact for SPA route fallback."
+                    },
+                    "themeLogoWrong": {
+                        "label": "Theme/logo looks wrong",
+                        "description": "Toggle theme once and refresh. The app saves theme under local storage key app_theme."
+                    }
+                }
+            }
+        }
+    }
+}

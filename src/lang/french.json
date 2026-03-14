@@ -1,0 +1,383 @@
+{
+    "common": {
+        "loading": "Chargement...",
+        "back": "Retour",
+        "cancel": "Annuler",
+        "custom": "Personnalisé",
+        "fetch": "Récupérer",
+        "retry": "Réessayer",
+        "to": "à",
+        "language": "Langue",
+        "light": "Clair",
+        "dark": "Sombre"
+    },
+    "nav": {
+        "dashboard": "Tableau de bord",
+        "payNow": "Payer maintenant",
+        "exchange": "Change",
+        "help": "Aide",
+        "history": "Historique",
+        "payments": "Paiements",
+        "exchanges": "Changes",
+        "getVerified": "Se faire vérifier",
+        "profile": "Profil",
+        "changePassword": "Changer le mot de passe",
+        "logout": "Se déconnecter",
+        "toggleSidebar": "Afficher/masquer la barre latérale",
+        "toggleMobileMenu": "Afficher/masquer le menu mobile",
+        "toggleTheme": "Changer le thème",
+        "userMenu": "Menu utilisateur"
+    },
+    "auth": {
+        "toggleTheme": "Changer le thème",
+        "subtitle": "Connectez-vous à votre portefeuille",
+        "username": "Nom d'utilisateur",
+        "password": "Mot de passe",
+        "confirmPassword": "Confirmer le mot de passe",
+        "email": "Email",
+        "cellphone": "Téléphone",
+        "environment": "Environnement",
+        "firstName": "Prénom",
+        "lastName": "Nom",
+        "referredBy": "Parrainé par",
+        "notaryNode": "Nœud notaire",
+        "enterUsername": "Entrez votre nom d'utilisateur",
+        "enterPassword": "Entrez votre mot de passe",
+        "hidePassword": "Masquer le mot de passe",
+        "showPassword": "Afficher le mot de passe",
+        "signIn": "Se connecter",
+        "signingIn": "Connexion...",
+        "newUser": "Nouveau utilisateur ?",
+        "createAccount": "Créer un compte",
+        "alreadyAccount": "Vous avez déjà un compte ?",
+        "backToLogin": "Retour à la connexion",
+        "signupTitle": "Inscrivez-vous chez nous",
+        "signupSubtitle": "Créez votre compte",
+        "submit": "Envoyer",
+        "submitting": "Envoi...",
+        "loginFailed": "Échec de connexion. Veuillez vérifier vos identifiants.",
+        "passwordMismatch": "Le mot de passe et sa confirmation doivent correspondre.",
+        "passwordPolicyFailed": "Le mot de passe ne respecte pas les exigences de sécurité.",
+        "referredByRequired": "Le champ Parrainé par est obligatoire.",
+        "signupConfigError": "Impossible de charger la configuration d'inscription. Veuillez réessayer.",
+        "missingBankCredentials": "L'inscription n'est pas configurée. Veuillez définir VITE_BANK_USERNAME et VITE_BANK_PASSWORD dans le fichier .env.",
+        "usernameExists": "Le nom d'utilisateur existe déjà. Veuillez en choisir un autre.",
+        "signupSuccess": "Compte créé avec succès.",
+        "signupFailed": "Échec de l'inscription. Veuillez réessayer.",
+        "notary": {
+            "sx": "WinstantGold SX - Sint Maarten",
+            "us": "WinstantGold US - États-Unis",
+            "eu": "WinstantGold EU - Europe"
+        }
+    },
+    "dashboard": {
+        "welcome": "Bienvenue, {{name}}",
+        "hideZero": "Masquer les soldes à zéro",
+        "loadingBalances": "Chargement des soldes...",
+        "loadError": "Impossible de charger les soldes. Veuillez réessayer.",
+        "noBalances": "Aucun solde à afficher.",
+        "available": "Disponible",
+        "reserved": "Réservé",
+        "total": "Total",
+        "viewStatement": "Voir le relevé →"
+    },
+    "statement": {
+        "title": "Relevé de compte",
+        "days": "{{days}} jours",
+        "all": "Tout",
+        "loading": "Chargement du relevé...",
+        "loadError": "Impossible de charger le relevé.",
+        "account": "Compte",
+        "opening": "Ouverture",
+        "closing": "Clôture",
+        "noTransactions": "Aucune transaction trouvée pour cette période.",
+        "date": "Date",
+        "type": "Type",
+        "description": "Description",
+        "debit": "Débit",
+        "credit": "Crédit",
+        "balance": "Solde",
+        "totalDebits": "Débits totaux",
+        "totalCredits": "Crédits totaux",
+        "netChange": "Variation nette"
+    },
+    "payment": {
+        "title": "Paiement instantané",
+        "receiverPayId": "PayID du destinataire",
+        "receiverPlaceholder": "Saisissez le PayID du destinataire",
+        "amount": "Montant",
+        "currency": "Devise",
+        "memoOptional": "Mémo (optionnel)",
+        "memoPlaceholder": "Note de paiement",
+        "reviewPayment": "Vérifier le paiement",
+        "reviewSend": "Vérifier et envoyer",
+        "sendPayment": "Envoyer le paiement",
+        "processing": "Traitement...",
+        "successTitle": "Paiement envoyé !",
+        "reference": "Référence",
+        "sendAnother": "Envoyer un autre",
+        "viewHistory": "Voir l'historique",
+        "instantReason": "Paiement instantané",
+        "to": "À",
+        "failed": "Échec de l'envoi du paiement. Veuillez réessayer."
+    },
+    "fx": {
+        "title": "Change FX",
+        "buyCurrencies": "Devises d'achat",
+        "sellCurrencies": "Devises de vente",
+        "buyCurrency": "Devise achetée",
+        "sellCurrency": "Devise vendue",
+        "amount": "Montant",
+        "amountCurrency": "Devise du montant",
+        "getQuote": "Obtenir un cours",
+        "requestingQuote": "Demande de cours...",
+        "quoteTitle": "Cours FX",
+        "expiresIn": "Expire dans {{time}}",
+        "symbol": "Symbole",
+        "rate": "Taux",
+        "buy": "Acheter",
+        "sell": "Vendre",
+        "dealType": "Type d'opération",
+        "valueDate": "Date de valeur",
+        "bookDeal": "Valider l'opération",
+        "booking": "Validation de l'opération...",
+        "expiredTitle": "Cours expiré",
+        "expiredBody": "Le cours a expiré. Veuillez en demander un nouveau.",
+        "newQuote": "Nouveau cours",
+        "successTitle": "Opération validée !",
+        "dealReference": "Référence opération",
+        "depositReference": "Référence dépôt",
+        "bought": "Acheté",
+        "sold": "Vendu",
+        "newExchange": "Nouveau change",
+        "viewHistory": "Voir l'historique",
+        "loadCurrenciesError": "Impossible de charger les devises.",
+        "quoteError": "Impossible d'obtenir un cours. Veuillez réessayer.",
+        "bookError": "Impossible de valider l'opération. Veuillez réessayer.",
+        "booked": "Validé"
+    },
+    "history": {
+        "paymentsTitle": "Historique des paiements",
+        "paymentsLoadError": "Impossible de charger l'historique des paiements.",
+        "noPayments": "Aucun paiement trouvé.",
+        "exchangeTitle": "Historique des changes",
+        "exchangeLoadError": "Impossible de charger l'historique des changes.",
+        "noDeals": "Aucune opération FX trouvée.",
+        "date": "Date",
+        "reference": "Référence",
+        "from": "De",
+        "to": "À",
+        "amount": "Montant",
+        "status": "Statut",
+        "sell": "Vente",
+        "buy": "Achat",
+        "rate": "Taux",
+        "booked": "Validé",
+        "valueDate": "Date de valeur"
+    },
+    "verification": {
+        "title": "Se faire vérifier",
+        "loading": "Chargement du statut de vérification...",
+        "loadError": "Impossible de charger les données de vérification. Veuillez réessayer.",
+        "alreadyVerifiedTitle": "Vous êtes vérifié",
+        "alreadyVerifiedMessage": "Votre identité a déjà été vérifiée. Aucune action supplémentaire n'est nécessaire.",
+        "step1Label": "Pièce d'identité",
+        "step2Label": "Selfie",
+        "step3Label": "Vérification",
+        "step4Label": "Terminé",
+        "step1Title": "Téléverser une pièce d'identité",
+        "step1Hint": "Sélectionnez votre pays et le type de pièce d'identité, puis téléversez le recto (et le verso si nécessaire).",
+        "step2Title": "Téléverser un selfie",
+        "step2Hint": "Prenez ou téléversez une photo selfie claire pour la vérification d'identité.",
+        "step3Title": "Vérifier et soumettre",
+        "step3Hint": "Vérifiez les informations extraites ci-dessous. Corrigez les erreurs avant de soumettre votre demande.",
+        "step4Title": "Vérification soumise",
+        "step4Hint": "Votre demande de vérification a été soumise avec succès. Vous serez notifié une fois examinée.",
+        "countryOfIssuance": "Pays de délivrance",
+        "selectCountry": "Sélectionner un pays...",
+        "idType": "Type de pièce d'identité",
+        "selectIdType": "Sélectionner un type...",
+        "frontFile": "Recto du document",
+        "backFile": "Verso du document",
+        "selfieFile": "Photo selfie",
+        "idNumber": "Numéro d'identification",
+        "issuerName": "Nom de l'émetteur",
+        "firstName": "Prénom",
+        "middleName": "Deuxième prénom",
+        "lastName": "Nom de famille",
+        "nationality": "Nationalité",
+        "dateOfBirth": "Date de naissance",
+        "placeOfBirth": "Lieu de naissance",
+        "gender": "Genre",
+        "genderNA": "N/A",
+        "genderMale": "Homme",
+        "genderFemale": "Femme",
+        "issuanceDate": "Date de délivrance",
+        "expirationDate": "Date d'expiration",
+        "uploading": "Téléversement...",
+        "submitting": "Soumission...",
+        "uploadDocuments": "Téléverser les documents",
+        "uploadSelfie": "Téléverser le selfie",
+        "submitVerification": "Soumettre la vérification",
+        "uploadIdError": "Échec du téléversement de la pièce d'identité. Veuillez réessayer.",
+        "uploadSelfieError": "Échec du téléversement du selfie. Veuillez réessayer.",
+        "submitError": "Échec de la soumission. Veuillez réessayer.",
+        "invalidFileType": "Type de fichier invalide. Seules les images JPG et PNG sont acceptées.",
+        "openCamera": "Ouvrir la caméra",
+        "capture": "Prendre la photo",
+        "retake": "Reprendre",
+        "orUploadFile": "ou téléverser un fichier",
+        "cameraError": "Impossible d'accéder à la caméra. Vérifiez les permissions ou téléversez un fichier.",
+        "referenceNumber": "Numéro de référence",
+        "verificationId": "ID de vérification",
+        "copy": "Copier",
+        "submittedDetails": "Détails soumis",
+        "startOver": "Recommencer avec de nouveaux documents",
+        "startNewVerification": "Soumettre un nouveau document d'identité",
+        "resetWarning": "Attention : Ceci supprimera vos documents d'identité et selfie actuels. Votre niveau de vérification (WKYC) sera réinitialisé au niveau 0. Vous devrez téléverser de nouveaux documents et soumettre à nouveau pour vérification.",
+        "confirmReset": "Oui, réinitialiser et recommencer",
+        "resetting": "Réinitialisation..."
+    },
+    "profile": {
+        "title": "Profil",
+        "accountInfo": "Compte",
+        "personalInfo": "Personnel",
+        "verification": "Vérification",
+        "settings": "Paramètres",
+        "status": "Statut",
+        "username": "Nom d'utilisateur",
+        "email": "Email",
+        "phone": "Téléphone",
+        "firstName": "Prénom",
+        "lastName": "Nom",
+        "organization": "Organisation",
+        "branch": "Succursale",
+        "wkycLevel": "Niveau WKYC",
+        "trustScore": "Score de confiance",
+        "wkycId": "ID WKYC",
+        "baseCurrency": "Devise de base",
+        "language": "Langue / Culture",
+        "enabled": "Activé",
+        "lockedOut": "Verrouillé",
+        "lastLogin": "Dernière connexion",
+        "lastPasswordChange": "Dernier changement de mot de passe",
+        "yes": "Oui",
+        "no": "Non",
+        "changePassword": "Changer le mot de passe",
+        "changePasswordTitle": "Changer le mot de passe",
+        "currentPassword": "Mot de passe actuel",
+        "newPassword": "Nouveau mot de passe",
+        "confirmNewPassword": "Confirmer le nouveau mot de passe",
+        "allFieldsRequired": "Tous les champs sont obligatoires.",
+        "changingPassword": "Modification...",
+        "passwordChanged": "Votre mot de passe a été modifié avec succès.",
+        "changePasswordError": "Échec du changement de mot de passe. Veuillez réessayer.",
+        "backToProfile": "Retour au profil",
+        "verifiedLinks": "Liens vérifiés",
+        "noVlinks": "Aucun lien vérifié trouvé.",
+        "vlinkReference": "Référence",
+        "vlinkName": "Nom",
+        "vlinkStatus": "Statut",
+        "vlinkUrl": "URL du VLink"
+    },
+    "help": {
+        "title": "Centre d'aide",
+        "subtitle": "Guide rapide des principaux parcours du portefeuille. Mettez à jour ce fichier pour maintenir les libellés et le contenu d'aide au même endroit.",
+        "searchPlaceholder": "Rechercher des sujets d'aide...",
+        "searchAria": "Rechercher des sujets d'aide",
+        "noResults": "Aucun sujet d'aide ne correspond à \"{{query}}\".",
+        "sections": {
+            "gettingStarted": {
+                "title": "Démarrage",
+                "intro": "Utilisez ces premières étapes lorsqu'un utilisateur ouvre l'application pour la première fois.",
+                "items": {
+                    "signIn": {
+                        "label": "Se connecter",
+                        "description": "Utilisez votre nom d'utilisateur et votre mot de passe sur la page de connexion. Si vous êtes nouveau, créez d'abord un compte depuis la page d'inscription."
+                    },
+                    "pickTheme": {
+                        "label": "Choisir un thème",
+                        "description": "Utilisez le switch Clair/Sombre sur la connexion ou l'inscription. Votre préférence de thème est enregistrée automatiquement."
+                    },
+                    "openDashboard": {
+                        "label": "Ouvrir le tableau de bord",
+                        "description": "Après connexion, vous arrivez sur le Tableau de bord où tous les soldes sont affichés par compte de devise."
+                    }
+                }
+            },
+            "dashboard": {
+                "title": "Tableau de bord",
+                "items": {
+                    "hideZero": {
+                        "label": "Masquer les soldes à zéro",
+                        "description": "Utilisez la case en haut à droite pour n'afficher que les comptes avec des valeurs disponibles/totales non nulles."
+                    },
+                    "viewStatement": {
+                        "label": "Voir le relevé",
+                        "description": "Cliquez sur une carte de compte pour ouvrir son relevé avec l'historique des transactions et les filtres de date."
+                    }
+                }
+            },
+            "payments": {
+                "title": "Payer maintenant",
+                "items": {
+                    "createPayment": {
+                        "label": "Créer un paiement",
+                        "description": "Saisissez le PayID du destinataire, le montant et la devise, puis passez à la vérification avant l'envoi."
+                    },
+                    "reviewConfirm": {
+                        "label": "Vérifier et confirmer",
+                        "description": "Vérifiez soigneusement les détails. Une fois publié, le statut du paiement et la référence apparaissent dans l'Historique des paiements."
+                    }
+                }
+            },
+            "exchange": {
+                "title": "Change (FX)",
+                "items": {
+                    "getQuote": {
+                        "label": "Obtenir un cours",
+                        "description": "Sélectionnez les devises d'achat/vente et le montant, puis demandez un cours."
+                    },
+                    "quoteExpiry": {
+                        "label": "Expiration du cours",
+                        "description": "Les cours ont un compte à rebours. S'il expire, demandez un nouveau cours avant de valider."
+                    },
+                    "bookDeal": {
+                        "label": "Valider l'opération",
+                        "description": "Validez le cours pour terminer le change et générer des références visibles dans l'Historique des changes."
+                    }
+                }
+            },
+            "history": {
+                "title": "Historique",
+                "items": {
+                    "paymentHistory": {
+                        "label": "Historique des paiements",
+                        "description": "Consultez les paiements envoyés avec date/heure, référence, parties, montant et statut."
+                    },
+                    "exchangeHistory": {
+                        "label": "Historique des changes",
+                        "description": "Consultez les opérations FX validées, les taux, les valeurs de conversion et les dates de valeur."
+                    }
+                }
+            },
+            "support": {
+                "title": "Dépannage",
+                "items": {
+                    "cantSignIn": {
+                        "label": "Impossible de se connecter",
+                        "description": "Vérifiez soigneusement le nom d'utilisateur/mot de passe et la disponibilité de l'API. Réessayez après quelques secondes."
+                    },
+                    "pageNotFound": {
+                        "label": "Page introuvable après déploiement",
+                        "description": "Assurez-vous que staticwebapp.config.json existe dans l'artefact déployé pour le fallback des routes SPA."
+                    },
+                    "themeLogoWrong": {
+                        "label": "Thème/logo incorrect",
+                        "description": "Basculez le thème une fois puis rafraîchissez. L'application enregistre le thème avec la clé locale app_theme."
+                    }
+                }
+            }
+        }
+    }
+}

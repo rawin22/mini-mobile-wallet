@@ -44,7 +44,7 @@ npm-debug.log
 
 # BUCK
 buck-out/
-\.buckd/
+.buckd/
 android/app/libs
 android/keystores/debug.keystore
 
@@ -53,3 +53,4 @@ android/keystores/debug.keystore
 dist/
 web-build/
 expo-env.d.ts
+.env
