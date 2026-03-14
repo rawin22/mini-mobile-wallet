@@ -35,8 +35,11 @@ export default function LoginScreen() {
     setIsLoading(true);
     setError('');
     try {
+      console.log('[LOGIN] attempting login, env:', envId, 'user:', username.trim());
       await login(username.trim(), password);
-    } catch {
+      console.log('[LOGIN] login() resolved OK');
+    } catch (err: any) {
+      console.error('[LOGIN] login() threw:', err?.message, err?.response?.status, JSON.stringify(err?.response?.data));
       setError('Login failed. Please check your credentials.');
     } finally {
       setIsLoading(false);

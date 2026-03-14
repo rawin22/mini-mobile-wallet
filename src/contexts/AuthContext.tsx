@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, type ReactNode } from 'react';
+import React, { useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
 import { useRouter } from 'expo-router';
 import type { AuthContextType, UserSettings, TokenData } from '../types/auth.types';
 import { authService } from '../api/auth.service';
@@ -16,14 +16,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [tokens, setTokens] = useState<TokenData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  // Use a ref so logout() never changes reference when router updates,
+  // which would otherwise re-trigger the init useEffect and cause a loop.
+  const routerRef = useRef(router);
+  useEffect(() => { routerRef.current = router; }, [router]);
 
   const logout = useCallback((): void => {
     storage.clearAuth();
     setUser(null);
     setTokens(null);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    router.replace('/(auth)/login' as any);
-  }, [router]);
+    routerRef.current.replace('/(auth)/login' as any);
+  }, []); // stable — no deps, uses ref internally
 
   // Register logout as the 401 handler for the API client
   useEffect(() => {
@@ -62,19 +66,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Initialize from SecureStore / AsyncStorage on mount
   useEffect(() => {
     const init = async () => {
+      console.log('[AUTH] init() — reading stored session');
       const storedUser = await storage.getUserData();
       const storedToken = storage.getAccessToken();
       const storedRefresh = storage.getRefreshToken();
       const storedExpires = storage.getExpiresAt();
+      console.log('[AUTH] init() stored:', {
+        hasUser: !!storedUser,
+        hasToken: !!storedToken,
+        hasRefresh: !!storedRefresh,
+        hasExpires: !!storedExpires,
+      });
 
       if (storedUser && storedToken && storedRefresh && storedExpires) {
         setUser(storedUser);
         setTokens({ accessToken: storedToken, refreshToken: storedRefresh, expiresAt: storedExpires });
         if (storage.isTokenExpired()) {
+          console.log('[AUTH] token expired, refreshing');
           await refreshToken();
         }
       }
       setIsLoading(false);
+      console.log('[AUTH] init() done, isLoading=false');
     };
     init();
   }, [refreshToken]);
@@ -89,7 +102,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [user, tokens, refreshToken]);
 
   const login = useCallback(async (username: string, password: string): Promise<void> => {
+    console.log('[AUTH] login() called for:', username);
     const response = await authService.login(username, password);
+    console.log('[AUTH] login response:', JSON.stringify({
+      hasTokens: !!response.tokens,
+      hasUserSettings: !!response.userSettings,
+      problems: (response as any).problems ?? null,
+    }));
     if (!response.tokens || !response.userSettings) {
       throw new Error('Invalid response from server');
     }
@@ -104,6 +123,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     await storage.setUserData(response.userSettings);
     setTokens(tokenData);
     setUser(response.userSettings);
+    console.log('[AUTH] login success, user:', response.userSettings.userName);
   }, []);
 
   const value: AuthContextType = {
