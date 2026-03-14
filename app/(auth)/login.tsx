@@ -16,6 +16,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [envId, setEnvId] = useState<AppEnvironmentId>(getActiveEnvironmentId());
   const [showEnvPicker, setShowEnvPicker] = useState(false);
 
@@ -71,14 +72,21 @@ export default function LoginScreen() {
             autoCapitalize="none"
             autoCorrect={false}
           />
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            placeholderTextColor={colors.textMuted}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
+          <View style={styles.inputRow}>
+            <TextInput
+              style={styles.inputFlex}
+              placeholder="Password"
+              placeholderTextColor={colors.textMuted}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+            <Pressable style={styles.eyeBtn} onPress={() => setShowPassword(!showPassword)}>
+              <Text style={styles.eyeText}>{showPassword ? '🙈' : '👁'}</Text>
+            </Pressable>
+          </View>
 
           {error !== '' && <Text style={styles.error}>{error}</Text>}
 
@@ -135,6 +143,15 @@ const styles = StyleSheet.create({
     borderRadius: radius.md, padding: spacing.md,
     color: colors.textPrimary, fontSize: typography.body,
   },
+  inputRow: { flexDirection: 'row', alignItems: 'center' },
+  inputFlex: {
+    flex: 1,
+    backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
+    borderRadius: radius.md, padding: spacing.md,
+    color: colors.textPrimary, fontSize: typography.body,
+  },
+  eyeBtn: { padding: spacing.sm, marginLeft: spacing.xs },
+  eyeText: { fontSize: 18 },
   error: { color: colors.danger, fontSize: typography.caption, textAlign: 'center' },
   button: {
     backgroundColor: colors.primary, borderRadius: radius.md,
