@@ -162,7 +162,7 @@ export default function ExchangeScreen() {
       {/* ── FORM ── */}
       {step === 'form' && (
         <View style={styles.card}>
-          <Text style={styles.label}>Buy Currency</Text>
+          <Text style={styles.label}>To Currency</Text>
           <Pressable style={styles.picker} onPress={() => setActivePicker('buy')}>
             <Text style={styles.pickerCode}>{buyCcy || 'Select'}</Text>
             <Text style={styles.pickerName}>
@@ -171,7 +171,7 @@ export default function ExchangeScreen() {
             <Text style={styles.chevron}>▾</Text>
           </Pressable>
 
-          <Text style={styles.label}>Sell Currency</Text>
+          <Text style={styles.label}>From Currency</Text>
           <Pressable style={styles.picker} onPress={() => setActivePicker('sell')}>
             <Text style={styles.pickerCode}>{sellCcy || 'Select'}</Text>
             <Text style={styles.pickerName}>
@@ -181,7 +181,7 @@ export default function ExchangeScreen() {
           </Pressable>
 
           {buyCcy === sellCcy && buyCcy !== '' && (
-            <Text style={styles.warning}>Buy and sell currencies must differ.</Text>
+            <Text style={styles.warning}>From and To currencies must differ.</Text>
           )}
 
           <Text style={styles.label}>Amount</Text>
@@ -233,8 +233,8 @@ export default function ExchangeScreen() {
           </View>
           <QuoteRow label="Symbol" value={quote.symbol} />
           <QuoteRow label="Rate" value={quote.rate} highlight />
-          <QuoteRow label="Buy" value={`${formatCurrency(parseFloat(quote.buyAmount))} ${quote.buyCurrencyCode}`} />
-          <QuoteRow label="Sell" value={`${formatCurrency(parseFloat(quote.sellAmount))} ${quote.sellCurrencyCode}`} />
+          <QuoteRow label="You receive" value={`${formatCurrency(parseFloat(quote.buyAmount))} ${quote.buyCurrencyCode}`} />
+          <QuoteRow label="You pay" value={`${formatCurrency(parseFloat(quote.sellAmount))} ${quote.sellCurrencyCode}`} />
           <QuoteRow label="Deal type" value={quote.dealType} />
           <QuoteRow label="Value date" value={quote.valueDate} />
           <View style={styles.buttonRow}>
@@ -267,8 +267,8 @@ export default function ExchangeScreen() {
           <Text style={[styles.sectionTitle, { textAlign: 'center' }]}>Deal Booked!</Text>
           <QuoteRow label="Deal reference" value={dealRef} />
           <QuoteRow label="Deposit reference" value={depositRef} />
-          <QuoteRow label="Bought" value={`${formatCurrency(parseFloat(quote.buyAmount))} ${quote.buyCurrencyCode}`} />
-          <QuoteRow label="Sold" value={`${formatCurrency(parseFloat(quote.sellAmount))} ${quote.sellCurrencyCode}`} />
+          <QuoteRow label="You received" value={`${formatCurrency(parseFloat(quote.buyAmount))} ${quote.buyCurrencyCode}`} />
+          <QuoteRow label="You paid" value={`${formatCurrency(parseFloat(quote.sellAmount))} ${quote.sellCurrencyCode}`} />
           <QuoteRow label="Rate" value={quote.rate} highlight />
           <View style={styles.buttonRow}>
             <Pressable style={[styles.button, styles.buttonFlex]} onPress={reset}>
@@ -289,8 +289,8 @@ export default function ExchangeScreen() {
         <Pressable style={styles.overlay} onPress={() => setActivePicker(null)}>
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>
-              {activePicker === 'buy' ? 'Buy Currency' :
-               activePicker === 'sell' ? 'Sell Currency' : 'Amount Currency'}
+              {activePicker === 'buy' ? 'To Currency' :
+               activePicker === 'sell' ? 'From Currency' : 'Amount Currency'}
             </Text>
             <FlatList
               data={pickerData}

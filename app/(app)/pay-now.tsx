@@ -105,7 +105,7 @@ export default function PayNowScreen() {
 
       {step === 'form' && (
         <View style={styles.card}>
-          <Text style={styles.label}>{t('payment.receiverPayId') || 'Recipient'}</Text>
+          <Text style={styles.label}>To (PayID)</Text>
           <TextInput style={styles.input} value={toCustomer} onChangeText={setToCustomer}
             placeholder="recipient@example.com" placeholderTextColor={colors.textMuted}
             autoCapitalize="none" autoCorrect={false} />
