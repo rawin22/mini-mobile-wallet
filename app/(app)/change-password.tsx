@@ -236,9 +236,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: spacing.xl,
-    gap: spacing.md,
   },
-  successIcon: { fontSize: 56, color: colors.accent },
-  successTitle: { fontSize: typography.heading, fontWeight: 'bold', color: colors.textPrimary },
-  successSub: { fontSize: typography.small, color: colors.textSecondary, textAlign: 'center' },
+  successIcon: { fontSize: 56, color: colors.accent, marginBottom: spacing.md },
+  successTitle: { fontSize: typography.heading, fontWeight: 'bold', color: colors.textPrimary, marginBottom: spacing.sm },
+  successSub: { fontSize: typography.small, color: colors.textSecondary, textAlign: 'center', marginBottom: spacing.lg },
 });

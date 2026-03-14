@@ -22,6 +22,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => { routerRef.current = router; }, [router]);
 
   const logout = useCallback((): void => {
+    console.log('[AUTH] logout');
     storage.clearAuth();
     setUser(null);
     setTokens(null);
@@ -66,28 +67,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Initialize from SecureStore / AsyncStorage on mount
   useEffect(() => {
     const init = async () => {
-      console.log('[AUTH] init() — reading stored session');
       const storedUser = await storage.getUserData();
       const storedToken = storage.getAccessToken();
       const storedRefresh = storage.getRefreshToken();
       const storedExpires = storage.getExpiresAt();
-      console.log('[AUTH] init() stored:', {
-        hasUser: !!storedUser,
-        hasToken: !!storedToken,
-        hasRefresh: !!storedRefresh,
-        hasExpires: !!storedExpires,
-      });
 
       if (storedUser && storedToken && storedRefresh && storedExpires) {
         setUser(storedUser);
         setTokens({ accessToken: storedToken, refreshToken: storedRefresh, expiresAt: storedExpires });
-        if (storage.isTokenExpired()) {
-          console.log('[AUTH] token expired, refreshing');
-          await refreshToken();
-        }
+        if (storage.isTokenExpired()) await refreshToken();
       }
       setIsLoading(false);
-      console.log('[AUTH] init() done, isLoading=false');
     };
     init();
   }, [refreshToken]);
@@ -102,13 +92,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [user, tokens, refreshToken]);
 
   const login = useCallback(async (username: string, password: string): Promise<void> => {
-    console.log('[AUTH] login() called for:', username);
+    console.log('[AUTH] login:', username);
     const response = await authService.login(username, password);
-    console.log('[AUTH] login response:', JSON.stringify({
-      hasTokens: !!response.tokens,
-      hasUserSettings: !!response.userSettings,
-      problems: (response as any).problems ?? null,
-    }));
     if (!response.tokens || !response.userSettings) {
       throw new Error('Invalid response from server');
     }
@@ -123,7 +108,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     await storage.setUserData(response.userSettings);
     setTokens(tokenData);
     setUser(response.userSettings);
-    console.log('[AUTH] login success, user:', response.userSettings.userName);
+    console.log('[AUTH] login success:', response.userSettings.userName);
   }, []);
 
   const value: AuthContextType = {

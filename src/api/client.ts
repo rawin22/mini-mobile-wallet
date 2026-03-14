@@ -28,7 +28,7 @@ apiClient.interceptors.request.use(
     if (token && config.headers && !config.headers.Authorization) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    console.log('[API]', config.method?.toUpperCase(), config.baseURL + config.url);
+    console.log(`[API] ${config.method?.toUpperCase()} ${config.url}`);
     return config;
   },
   (error: AxiosError) => Promise.reject(error),
@@ -46,10 +46,16 @@ const processQueue = (error: AxiosError | null = null) => {
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    console.error('[API] error:', error.response?.status, error.config?.url, JSON.stringify(error.response?.data));
+    console.warn(`[API] ${error.response?.status} ${error.config?.url}`, error.response?.data);
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
     const requestUrl = originalRequest?.url ?? '';
     const isRefreshRequest = requestUrl.includes(API_CONFIG.ENDPOINTS.AUTH.REFRESH);
+    const isLoginRequest = requestUrl.includes(API_CONFIG.ENDPOINTS.AUTH.LOGIN);
+
+    // Login failures are credential errors — never try to refresh, just reject
+    if (error.response?.status === 401 && isLoginRequest) {
+      return Promise.reject(error);
+    }
 
     if (error.response?.status === 401 && isRefreshRequest) {
       redirectToLogin();
