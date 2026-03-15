@@ -14,8 +14,6 @@ import { colors, spacing, typography, radius } from '../../../src/theme';
 
 const PAGE_SIZE = 25;
 
-type StatusKey = '' | 'settled' | 'pending' | 'cancelled';
-
 export default function ConvertHistoryScreen() {
   const { t } = useLanguage();
   const router = useRouter();
@@ -28,7 +26,6 @@ export default function ConvertHistoryScreen() {
 
   // Filters
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<StatusKey>('');
 
   const fetchDeals = useCallback(async (page: number, showRefresh = false) => {
     showRefresh ? setIsRefreshing(true) : setIsLoading(true);
@@ -50,45 +47,17 @@ export default function ConvertHistoryScreen() {
 
   useEffect(() => { fetchDeals(currentPage); }, [fetchDeals, currentPage]);
 
-  // Status helpers
-  const getStatusCategory = (typeName: string): string => {
-    const s = typeName.toLowerCase();
-    if (s.includes('settled') || s.includes('completed')) return 'settled';
-    if (s.includes('booked') || s.includes('pending') || s.includes('spot')) return 'pending';
-    if (s.includes('cancelled') || s.includes('expired') || s.includes('voided')) return 'cancelled';
-    return 'pending';
-  };
-
-  const statusColor = (typeName: string) => {
-    const cat = getStatusCategory(typeName);
-    if (cat === 'settled') return colors.accent;
-    if (cat === 'cancelled') return colors.danger;
-    return colors.warning;
-  };
-
-  const statusLabel = (typeName: string) => {
-    const cat = getStatusCategory(typeName);
-    if (cat === 'settled') return 'Settled';
-    if (cat === 'cancelled') return 'Cancelled';
-    return 'Pending';
-  };
-
-  // Client-side filtering
+  // Client-side filtering (search only — no fake status)
   const filteredDeals = useMemo(() => {
-    return deals.filter((d) => {
-      if (statusFilter && getStatusCategory(d.fxDealTypeName) !== statusFilter) return false;
-      if (searchTerm) {
-        const term = searchTerm.toLowerCase();
-        return (
-          (d.fxDealReference || '').toLowerCase().includes(term) ||
-          (d.buyCurrencyCode || '').toLowerCase().includes(term) ||
-          (d.sellCurrencyCode || '').toLowerCase().includes(term) ||
-          (d.bookedForCustomerName || '').toLowerCase().includes(term)
-        );
-      }
-      return true;
-    });
-  }, [deals, statusFilter, searchTerm]);
+    if (!searchTerm) return deals;
+    const term = searchTerm.toLowerCase();
+    return deals.filter((d) =>
+      (d.fxDealReference || '').toLowerCase().includes(term) ||
+      (d.buyCurrencyCode || '').toLowerCase().includes(term) ||
+      (d.sellCurrencyCode || '').toLowerCase().includes(term) ||
+      (d.fxDealTypeName || '').toLowerCase().includes(term)
+    );
+  }, [deals, searchTerm]);
 
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
@@ -100,9 +69,9 @@ export default function ConvertHistoryScreen() {
           <Text style={styles.ref} numberOfLines={1}>{item.fxDealReference}</Text>
           <Text style={styles.date}>{formatDateTime(item.bookedTime)}</Text>
         </View>
-        <View style={[styles.badge, { backgroundColor: `${statusColor(item.fxDealTypeName)}22` }]}>
-          <Text style={[styles.badgeText, { color: statusColor(item.fxDealTypeName) }]}>
-            {statusLabel(item.fxDealTypeName)}
+        <View style={[styles.badge, { backgroundColor: `${colors.accent}22` }]}>
+          <Text style={[styles.badgeText, { color: colors.accent }]}>
+            {item.fxDealTypeName}
           </Text>
         </View>
       </View>
@@ -183,26 +152,6 @@ export default function ConvertHistoryScreen() {
             )}
           </View>
 
-          {/* Status filter buttons */}
-          <View style={styles.filterRow}>
-            {([
-              { key: '' as StatusKey, label: 'All' },
-              { key: 'settled' as StatusKey, label: 'Settled' },
-              { key: 'pending' as StatusKey, label: 'Pending' },
-              { key: 'cancelled' as StatusKey, label: 'Cancelled' },
-            ]).map((f) => (
-              <Pressable
-                key={f.key}
-                style={[styles.filterBtn, statusFilter === f.key && styles.filterBtnActive]}
-                onPress={() => setStatusFilter(f.key)}
-              >
-                <Text style={[styles.filterBtnText, statusFilter === f.key && styles.filterBtnTextActive]}>
-                  {f.label}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-
           <Text style={styles.resultsInfo}>
             Showing {filteredDeals.length} of {totalCount} exchanges
           </Text>
@@ -262,16 +211,6 @@ const styles = StyleSheet.create({
   },
   searchInput: { flex: 1, fontSize: typography.small, color: colors.textPrimary, paddingVertical: 4 },
 
-  // Filters
-  filterRow: { flexDirection: 'row', gap: spacing.xs },
-  filterBtn: {
-    paddingHorizontal: spacing.sm, paddingVertical: spacing.xs,
-    borderRadius: radius.full, borderWidth: 1, borderColor: colors.border,
-    backgroundColor: colors.surface,
-  },
-  filterBtnActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  filterBtnText: { fontSize: typography.caption, color: colors.textSecondary, fontWeight: '600' },
-  filterBtnTextActive: { color: colors.textPrimary },
   resultsInfo: { fontSize: typography.caption, color: colors.textMuted },
 
   // Cards
