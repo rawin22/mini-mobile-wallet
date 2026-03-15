@@ -4,19 +4,14 @@ import {
 } from 'react-native';
 import { useState, useEffect, useCallback } from 'react';
 import { useLocalSearchParams } from 'expo-router';
+import { useLanguage } from '../../../src/hooks/useLanguage';
 import { statementService } from '../../../src/api/statement.service';
 import { formatCurrency, formatDateTime, todayDateString } from '../../../src/utils/formatters';
 import type { StatementEntry, AccountInfo } from '../../../src/types/statement.types';
-import { colors, spacing, typography, radius } from '../../../src/theme';
+import { GradientCard, CurrencyIcon } from '../../../components/ui';
+import { colors, spacing, typography, radius, gradients } from '../../../src/theme';
 
 type Preset = '7' | '30' | '90' | 'all';
-
-const PRESETS: { label: string; value: Preset }[] = [
-  { label: '7d', value: '7' },
-  { label: '30d', value: '30' },
-  { label: '90d', value: '90' },
-  { label: 'All', value: 'all' },
-];
 
 const dateFromPreset = (preset: Preset): string => {
   if (preset === 'all') return '2000-01-01';
@@ -27,12 +22,20 @@ const dateFromPreset = (preset: Preset): string => {
 
 export default function StatementScreen() {
   const { accountId } = useLocalSearchParams<{ accountId: string }>();
+  const { t } = useLanguage();
   const [preset, setPreset] = useState<Preset>('30');
   const [accountInfo, setAccountInfo] = useState<AccountInfo | null>(null);
   const [entries, setEntries] = useState<StatementEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState('');
+
+  const PRESETS: { label: string; value: Preset }[] = [
+    { label: t('statement.days', { days: '7' }) || '7d', value: '7' },
+    { label: t('statement.days', { days: '30' }) || '30d', value: '30' },
+    { label: t('statement.days', { days: '90' }) || '90d', value: '90' },
+    { label: t('statement.all') || 'All', value: 'all' },
+  ];
 
   const fetchStatement = useCallback(async (p: Preset, showRefresh = false) => {
     if (!accountId) return;
@@ -47,12 +50,12 @@ export default function StatementScreen() {
       setAccountInfo(response.accountInfo ?? null);
       setEntries(response.entries ?? []);
     } catch {
-      setError('Could not load statement. Pull to refresh.');
+      setError(t('statement.loadError') || 'Could not load statement. Pull to refresh.');
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, [accountId]);
+  }, [accountId, t]);
 
   useEffect(() => { fetchStatement(preset); }, [fetchStatement, preset]);
 
@@ -84,25 +87,30 @@ export default function StatementScreen() {
   const header = (
     <>
       {accountInfo && (
-        <View style={styles.summaryCard}>
-          <Text style={styles.accountName}>{accountInfo.accountName}</Text>
-          <Text style={styles.accountMeta}>
-            {accountInfo.accountCurrencyCode} · {accountInfo.accountNumber}
-          </Text>
+        <GradientCard colors={gradients.card} style={styles.summaryCard}>
+          <View style={styles.summaryHeader}>
+            <CurrencyIcon code={accountInfo.accountCurrencyCode} size={32} />
+            <View>
+              <Text style={styles.accountName}>{accountInfo.accountName}</Text>
+              <Text style={styles.accountMeta}>
+                {accountInfo.accountCurrencyCode} · {accountInfo.accountNumber}
+              </Text>
+            </View>
+          </View>
           <View style={styles.balanceRow}>
             <View>
-              <Text style={styles.balanceLabel}>Opening</Text>
+              <Text style={styles.balanceLabel}>{t('statement.opening') || 'Opening'}</Text>
               <Text style={styles.balanceValue}>{formatCurrency(accountInfo.beginningBalance)}</Text>
             </View>
             <View style={styles.balanceDivider} />
             <View style={styles.balanceRight}>
-              <Text style={styles.balanceLabel}>Closing</Text>
+              <Text style={styles.balanceLabel}>{t('statement.closing') || 'Closing'}</Text>
               <Text style={[styles.balanceValue, styles.balanceHighlight]}>
                 {formatCurrency(accountInfo.endingBalance)}
               </Text>
             </View>
           </View>
-        </View>
+        </GradientCard>
       )}
 
       <View style={styles.presetRow}>
@@ -120,8 +128,8 @@ export default function StatementScreen() {
       </View>
 
       <View style={styles.tableHeader}>
-        <Text style={[styles.tableHeaderText, styles.flex]}>Description</Text>
-        <Text style={styles.tableHeaderText}>Amount / Balance</Text>
+        <Text style={[styles.tableHeaderText, styles.flex]}>{t('statement.description') || 'Description'}</Text>
+        <Text style={styles.tableHeaderText}>{t('statement.balance') || 'Amount / Balance'}</Text>
       </View>
     </>
   );
@@ -143,7 +151,7 @@ export default function StatementScreen() {
       renderItem={renderEntry}
       ListHeaderComponent={header}
       ListEmptyComponent={
-        <Text style={styles.empty}>{error || 'No transactions in this period.'}</Text>
+        <Text style={styles.empty}>{error || t('statement.noTransactions') || 'No transactions in this period.'}</Text>
       }
       refreshControl={
         <RefreshControl
@@ -162,18 +170,12 @@ const styles = StyleSheet.create({
   list: { padding: spacing.md },
   center: { flex: 1, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center' },
 
-  summaryCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing.md,
-    marginBottom: spacing.md,
-  },
+  summaryCard: { marginBottom: spacing.md },
+  summaryHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.sm },
   accountName: { fontSize: typography.body, fontWeight: 'bold', color: colors.textPrimary },
-  accountMeta: { fontSize: typography.caption, color: colors.textSecondary, marginTop: 2, marginBottom: spacing.sm },
+  accountMeta: { fontSize: typography.caption, color: colors.textSecondary, marginTop: 2 },
   balanceRow: { flexDirection: 'row', alignItems: 'center' },
-  balanceDivider: { width: 1, height: 36, backgroundColor: colors.border, marginHorizontal: spacing.md },
+  balanceDivider: { width: 1, height: 36, backgroundColor: colors.borderLight, marginHorizontal: spacing.md },
   balanceRight: { alignItems: 'flex-start' },
   balanceLabel: { fontSize: typography.caption, color: colors.textSecondary },
   balanceValue: { fontSize: typography.heading, fontWeight: 'bold', color: colors.textPrimary },
@@ -190,20 +192,13 @@ const styles = StyleSheet.create({
   presetTextActive: { color: colors.textPrimary },
 
   tableHeader: {
-    flexDirection: 'row',
-    paddingVertical: spacing.xs,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    marginBottom: spacing.xs,
+    flexDirection: 'row', paddingVertical: spacing.xs,
+    borderBottomWidth: 1, borderBottomColor: colors.border, marginBottom: spacing.xs,
   },
   tableHeaderText: { fontSize: typography.caption, color: colors.textMuted, fontWeight: '600' },
   flex: { flex: 1 },
 
-  row: {
-    flexDirection: 'row',
-    paddingVertical: spacing.sm,
-    gap: spacing.sm,
-  },
+  row: { flexDirection: 'row', paddingVertical: spacing.sm, gap: spacing.sm },
   rowLeft: { flex: 1 },
   rowDesc: { fontSize: typography.small, color: colors.textPrimary },
   rowMeta: { fontSize: typography.caption, color: colors.textMuted, marginTop: 2 },

@@ -6,4 +6,7 @@ export const STORAGE_KEYS = {
   SELECTED_ENVIRONMENT: 'selected_environment',
   AUTH_RESET_DONE: 'auth_reset_done_v1',
   ENCRYPTED_CREDENTIALS: 'auth_encrypted_credentials',
+  REMEMBER_ME: 'auth_remember_me',
+  PIN_HASH: 'auth_pin_hash',
+  ONBOARDING_COMPLETED: 'onboarding_completed',
 } as const;

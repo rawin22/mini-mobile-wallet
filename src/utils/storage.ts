@@ -152,4 +152,55 @@ export const storage = {
   async removeItem(key: string): Promise<void> {
     await AsyncStorage.removeItem(key);
   },
+
+  // ── Remember Me ──────────────────────────────────────────────────────────────
+
+  async setRememberMe(enabled: boolean): Promise<void> {
+    await AsyncStorage.setItem(STORAGE_KEYS.REMEMBER_ME, enabled ? '1' : '0');
+  },
+
+  async getRememberMe(): Promise<boolean> {
+    const val = await AsyncStorage.getItem(STORAGE_KEYS.REMEMBER_ME);
+    return val === '1';
+  },
+
+  // ── PIN Code (stored in SecureStore — encrypted at rest) ─────────────────────
+
+  async setPin(pin: string): Promise<void> {
+    // Simple hash: XOR-cipher the PIN with a fixed salt then base64-encode.
+    // SecureStore already encrypts at rest; this adds a layer so the raw digits
+    // are never stored even in the encrypted store.
+    const hashed = transformWithKey(pin, 'encrypt');
+    await SecureStore.setItemAsync(STORAGE_KEYS.PIN_HASH, hashed);
+  },
+
+  verifyPin(pin: string): boolean {
+    const stored = SecureStore.getItem(STORAGE_KEYS.PIN_HASH);
+    if (!stored) return false;
+    const hashed = transformWithKey(pin, 'encrypt');
+    return hashed === stored;
+  },
+
+  hasPin(): boolean {
+    return !!SecureStore.getItem(STORAGE_KEYS.PIN_HASH);
+  },
+
+  async clearPin(): Promise<void> {
+    await SecureStore.deleteItemAsync(STORAGE_KEYS.PIN_HASH);
+  },
+
+  // ── Onboarding ───────────────────────────────────────────────────────────────
+
+  async setOnboardingCompleted(): Promise<void> {
+    await AsyncStorage.setItem(STORAGE_KEYS.ONBOARDING_COMPLETED, '1');
+  },
+
+  async isOnboardingCompleted(): Promise<boolean> {
+    const val = await AsyncStorage.getItem(STORAGE_KEYS.ONBOARDING_COMPLETED);
+    return val === '1';
+  },
+
+  async resetOnboarding(): Promise<void> {
+    await AsyncStorage.removeItem(STORAGE_KEYS.ONBOARDING_COMPLETED);
+  },
 };

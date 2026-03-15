@@ -9,8 +9,10 @@ import { useLanguage } from '../../src/hooks/useLanguage';
 import { instantPaymentService } from '../../src/api/instant-payment.service';
 import { balanceService } from '../../src/api/balance.service';
 import { formatCurrency, todayDateString } from '../../src/utils/formatters';
+import { storage } from '../../src/utils/storage';
 import type { CustomerBalanceData } from '../../src/types/balance.types';
 import { colors, spacing, typography, radius } from '../../src/theme';
+import { CurrencyIcon, PinEntryModal } from '../../components/ui';
 
 type Step = 'form' | 'review' | 'processing' | 'success';
 
@@ -28,6 +30,7 @@ export default function PayNowScreen() {
   const [memo, setMemo] = useState('');
   const [paymentReference, setPaymentReference] = useState('');
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
+  const [showPinModal, setShowPinModal] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -156,7 +159,13 @@ export default function PayNowScreen() {
             <Pressable style={styles.secondaryButton} onPress={() => setStep('form')}>
               <Text style={styles.secondaryButtonText}>{t('common.back') || 'Back'}</Text>
             </Pressable>
-            <Pressable style={[styles.button, styles.buttonFlex]} onPress={handleSend}>
+            <Pressable style={[styles.button, styles.buttonFlex]} onPress={() => {
+              if (storage.hasPin()) {
+                setShowPinModal(true);
+              } else {
+                handleSend();
+              }
+            }}>
               <Text style={styles.buttonText}>{t('payment.sendPayment') || 'Send'}</Text>
             </Pressable>
           </View>
@@ -208,7 +217,10 @@ export default function PayNowScreen() {
               renderItem={({ item }) => (
                 <Pressable style={[styles.option, item.currencyCode === currency && styles.optionActive]}
                   onPress={() => { setCurrency(item.currencyCode); setShowCurrencyPicker(false); }}>
-                  <Text style={styles.optionText}>{item.currencyCode}</Text>
+                  <View style={styles.optionRow}>
+                    <CurrencyIcon code={item.currencyCode} size={28} />
+                    <Text style={styles.optionText}>{item.currencyCode}</Text>
+                  </View>
                   <Text style={styles.optionSub}>Available: {formatCurrency(item.balanceAvailable)}</Text>
                 </Pressable>
               )}
@@ -216,6 +228,13 @@ export default function PayNowScreen() {
           </View>
         </Pressable>
       </Modal>
+
+      <PinEntryModal
+        visible={showPinModal}
+        title={t('pin.enterPin') || 'Enter PIN to Send'}
+        onSuccess={() => { setShowPinModal(false); handleSend(); }}
+        onCancel={() => setShowPinModal(false)}
+      />
     </ScrollView>
   );
 }
@@ -252,6 +271,7 @@ const styles = StyleSheet.create({
   modalTitle: { fontSize: typography.body, fontWeight: 'bold', color: colors.textPrimary, padding: spacing.md, borderBottomWidth: 1, borderBottomColor: colors.border },
   option: { padding: spacing.md, borderBottomWidth: 1, borderBottomColor: colors.border },
   optionActive: { backgroundColor: `${colors.primary}22` },
+  optionRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   optionText: { color: colors.textPrimary, fontSize: typography.body, fontWeight: '600' },
   optionSub: { color: colors.textSecondary, fontSize: typography.caption, marginTop: 2 },
 });

@@ -6,14 +6,18 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { fxService } from '../../src/api/fx.service';
 import { formatCurrency, formatCountdown } from '../../src/utils/formatters';
+import { storage } from '../../src/utils/storage';
 import type { FxCurrency, FxQuote } from '../../src/types/fx.types';
 import { colors, spacing, typography, radius } from '../../src/theme';
+import { useLanguage } from '../../src/hooks/useLanguage';
+import { CurrencyIcon, PinEntryModal } from '../../components/ui';
 
 type Step = 'form' | 'quoting' | 'quote' | 'booking' | 'success' | 'expired';
 type Picker = 'buy' | 'sell' | 'amountCcy' | null;
 
 export default function ExchangeScreen() {
   const router = useRouter();
+  const { t } = useLanguage();
 
   const [step, setStep] = useState<Step>('form');
   const [error, setError] = useState('');
@@ -30,6 +34,7 @@ export default function ExchangeScreen() {
   const [secondsRemaining, setSecondsRemaining] = useState(0);
   const [dealRef, setDealRef] = useState('');
   const [depositRef, setDepositRef] = useState('');
+  const [showPinModal, setShowPinModal] = useState(false);
 
   // Load currencies on mount
   useEffect(() => {
@@ -151,7 +156,7 @@ export default function ExchangeScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-      <Text style={styles.title}>Exchange</Text>
+      <Text style={styles.title}>{t('fx.title') || 'Exchange'}</Text>
 
       {!!error && (
         <View style={styles.errorBox}>
@@ -162,7 +167,7 @@ export default function ExchangeScreen() {
       {/* ── FORM ── */}
       {step === 'form' && (
         <View style={styles.card}>
-          <Text style={styles.label}>To Currency</Text>
+          <Text style={styles.label}>{t('fx.buyCurrency') || 'To Currency'}</Text>
           <Pressable style={styles.picker} onPress={() => setActivePicker('buy')}>
             <Text style={styles.pickerCode}>{buyCcy || 'Select'}</Text>
             <Text style={styles.pickerName}>
@@ -171,7 +176,7 @@ export default function ExchangeScreen() {
             <Text style={styles.chevron}>▾</Text>
           </Pressable>
 
-          <Text style={styles.label}>From Currency</Text>
+          <Text style={styles.label}>{t('fx.sellCurrency') || 'From Currency'}</Text>
           <Pressable style={styles.picker} onPress={() => setActivePicker('sell')}>
             <Text style={styles.pickerCode}>{sellCcy || 'Select'}</Text>
             <Text style={styles.pickerName}>
@@ -184,7 +189,7 @@ export default function ExchangeScreen() {
             <Text style={styles.warning}>From and To currencies must differ.</Text>
           )}
 
-          <Text style={styles.label}>Amount</Text>
+          <Text style={styles.label}>{t('fx.amount') || 'Amount'}</Text>
           <TextInput
             style={styles.input}
             value={amount}
@@ -194,7 +199,7 @@ export default function ExchangeScreen() {
             keyboardType="decimal-pad"
           />
 
-          <Text style={styles.label}>Amount Currency</Text>
+          <Text style={styles.label}>{t('fx.amountCurrency') || 'Amount Currency'}</Text>
           <Pressable style={styles.picker} onPress={() => setActivePicker('amountCcy')}>
             <Text style={styles.pickerCode}>{amountCcy || 'Select'}</Text>
             <Text style={styles.chevron}>▾</Text>
@@ -205,7 +210,7 @@ export default function ExchangeScreen() {
             disabled={!isFormValid}
             onPress={handleGetQuote}
           >
-            <Text style={styles.buttonText}>Get Quote</Text>
+            <Text style={styles.buttonText}>{t('fx.getQuote') || 'Get Quote'}</Text>
           </Pressable>
         </View>
       )}
@@ -241,8 +246,14 @@ export default function ExchangeScreen() {
             <Pressable style={styles.secondaryButton} onPress={reset}>
               <Text style={styles.secondaryButtonText}>Cancel</Text>
             </Pressable>
-            <Pressable style={[styles.button, styles.buttonFlex]} onPress={handleBookDeal}>
-              <Text style={styles.buttonText}>Book Deal</Text>
+            <Pressable style={[styles.button, styles.buttonFlex]} onPress={() => {
+              if (storage.hasPin()) {
+                setShowPinModal(true);
+              } else {
+                handleBookDeal();
+              }
+            }}>
+              <Text style={styles.buttonText}>{t('fx.bookDeal') || 'Book Deal'}</Text>
             </Pressable>
           </View>
         </View>
@@ -289,8 +300,8 @@ export default function ExchangeScreen() {
         <Pressable style={styles.overlay} onPress={() => setActivePicker(null)}>
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>
-              {activePicker === 'buy' ? 'To Currency' :
-               activePicker === 'sell' ? 'From Currency' : 'Amount Currency'}
+              {activePicker === 'buy' ? (t('fx.buyCurrency') || 'To Currency') :
+               activePicker === 'sell' ? (t('fx.sellCurrency') || 'From Currency') : (t('fx.amountCurrency') || 'Amount Currency')}
             </Text>
             <FlatList
               data={pickerData}
@@ -300,6 +311,7 @@ export default function ExchangeScreen() {
                   style={[styles.option, item.currencyCode === activePickerSelected && styles.optionActive]}
                   onPress={() => handlePickerSelect(item.currencyCode)}
                 >
+                  <CurrencyIcon code={item.currencyCode} size={28} />
                   <Text style={styles.optionCode}>{item.currencyCode}</Text>
                   <Text style={styles.optionName}>{item.currencyName}</Text>
                 </Pressable>
@@ -308,6 +320,13 @@ export default function ExchangeScreen() {
           </View>
         </Pressable>
       </Modal>
+
+      <PinEntryModal
+        visible={showPinModal}
+        title={t('pin.enterPin') || 'Enter PIN to Book Deal'}
+        onSuccess={() => { setShowPinModal(false); handleBookDeal(); }}
+        onCancel={() => setShowPinModal(false)}
+      />
     </ScrollView>
   );
 }

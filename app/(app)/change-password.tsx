@@ -5,12 +5,15 @@ import {
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../src/hooks/useAuth';
+import { useLanguage } from '../../src/hooks/useLanguage';
 import { authService } from '../../src/api/auth.service';
+import { Ionicons } from '@expo/vector-icons';
 import type { AxiosError } from 'axios';
 import { colors, spacing, typography, radius } from '../../src/theme';
 
 export default function ChangePasswordScreen() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const router = useRouter();
 
   const [oldPassword, setOldPassword] = useState('');
@@ -26,7 +29,7 @@ export default function ChangePasswordScreen() {
   if (!user) return null;
 
   const validate = (): string | null => {
-    if (!oldPassword || !newPassword || !confirmPassword) return 'All fields are required.';
+    if (!oldPassword || !newPassword || !confirmPassword) return t('profile.allFieldsRequired') || 'All fields are required.';
     if (newPassword !== confirmPassword) return 'New passwords do not match.';
     if (user.passwordRegEx) {
       try {
@@ -51,7 +54,7 @@ export default function ChangePasswordScreen() {
       const axiosErr = err as AxiosError<{ message?: string; problems?: string }>;
       const msg = axiosErr.response?.data?.message
         || axiosErr.response?.data?.problems
-        || 'Failed to change password. Please try again.';
+        || t('profile.changePasswordError') || 'Failed to change password. Please try again.';
       setError(String(msg));
     } finally {
       setSubmitting(false);
@@ -62,10 +65,10 @@ export default function ChangePasswordScreen() {
     return (
       <View style={styles.successContainer}>
         <Text style={styles.successIcon}>✓</Text>
-        <Text style={styles.successTitle}>Password Changed</Text>
-        <Text style={styles.successSub}>Your password has been updated successfully.</Text>
+        <Text style={styles.successTitle}>{t('profile.changePasswordTitle') || 'Password Changed'}</Text>
+        <Text style={styles.successSub}>{t('profile.passwordChanged') || 'Your password has been updated successfully.'}</Text>
         <Pressable style={styles.button} onPress={() => router.back()}>
-          <Text style={styles.buttonText}>Back to Profile</Text>
+          <Text style={styles.buttonText}>{t('profile.backToProfile') || 'Back to Profile'}</Text>
         </Pressable>
       </View>
     );
@@ -85,7 +88,7 @@ export default function ChangePasswordScreen() {
         )}
 
         <View style={styles.card}>
-          <Text style={styles.fieldLabel}>Current Password</Text>
+          <Text style={styles.fieldLabel}>{t('profile.currentPassword') || 'Current Password'}</Text>
           <View style={styles.inputRow}>
             <TextInput
               style={styles.input}
@@ -98,11 +101,11 @@ export default function ChangePasswordScreen() {
               autoCorrect={false}
             />
             <Pressable style={styles.eyeBtn} onPress={() => setShowOld(!showOld)}>
-              <Text style={styles.eyeText}>{showOld ? '🙈' : '👁'}</Text>
+              <Ionicons name={showOld ? 'eye-off-outline' : 'eye-outline'} size={20} color={colors.textMuted} />
             </Pressable>
           </View>
 
-          <Text style={styles.fieldLabel}>New Password</Text>
+          <Text style={styles.fieldLabel}>{t('profile.newPassword') || 'New Password'}</Text>
           <View style={styles.inputRow}>
             <TextInput
               style={styles.input}
@@ -115,11 +118,11 @@ export default function ChangePasswordScreen() {
               autoCorrect={false}
             />
             <Pressable style={styles.eyeBtn} onPress={() => setShowNew(!showNew)}>
-              <Text style={styles.eyeText}>{showNew ? '🙈' : '👁'}</Text>
+              <Ionicons name={showNew ? 'eye-off-outline' : 'eye-outline'} size={20} color={colors.textMuted} />
             </Pressable>
           </View>
 
-          <Text style={styles.fieldLabel}>Confirm New Password</Text>
+          <Text style={styles.fieldLabel}>{t('profile.confirmNewPassword') || 'Confirm New Password'}</Text>
           <View style={styles.inputRow}>
             <TextInput
               style={styles.input}
@@ -132,7 +135,7 @@ export default function ChangePasswordScreen() {
               autoCorrect={false}
             />
             <Pressable style={styles.eyeBtn} onPress={() => setShowConfirm(!showConfirm)}>
-              <Text style={styles.eyeText}>{showConfirm ? '🙈' : '👁'}</Text>
+              <Ionicons name={showConfirm ? 'eye-off-outline' : 'eye-outline'} size={20} color={colors.textMuted} />
             </Pressable>
           </View>
 
@@ -145,7 +148,7 @@ export default function ChangePasswordScreen() {
 
         <View style={styles.actions}>
           <Pressable style={styles.secondaryButton} onPress={() => router.back()}>
-            <Text style={styles.secondaryButtonText}>Cancel</Text>
+            <Text style={styles.secondaryButtonText}>{t('common.cancel') || 'Cancel'}</Text>
           </Pressable>
           <Pressable
             style={[styles.button, styles.buttonFlex, submitting && styles.buttonDisabled]}
@@ -154,7 +157,7 @@ export default function ChangePasswordScreen() {
           >
             {submitting
               ? <ActivityIndicator color={colors.textPrimary} />
-              : <Text style={styles.buttonText}>Change Password</Text>
+              : <Text style={styles.buttonText}>{t('profile.changePassword') || 'Change Password'}</Text>
             }
           </Pressable>
         </View>

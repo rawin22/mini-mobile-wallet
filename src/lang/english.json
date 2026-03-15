@@ -64,6 +64,7 @@
         "usernameExists": "Username already exists. Please choose a different username.",
         "signupSuccess": "Account successfully created.",
         "signupFailed": "Signup failed. Please try again.",
+        "rememberMe": "Remember Me",
         "notary": {
             "sx": "WinstantGold SX - Sint Maarten",
             "us": "WinstantGold US - United States",
@@ -379,5 +380,31 @@
                 }
             }
         }
+    },
+    "pin": {
+        "setPin": "Set PIN",
+        "changePin": "Change PIN",
+        "enterPin": "Enter PIN",
+        "confirmPin": "Confirm PIN",
+        "pinMismatch": "PINs do not match. Try again.",
+        "pinSet": "PIN has been set successfully.",
+        "incorrectPin": "Incorrect PIN",
+        "tooManyAttempts": "Too many attempts. Please wait.",
+        "forgotPin": "Forgot PIN?"
+    },
+    "onboarding": {
+        "skip": "Skip",
+        "next": "Next",
+        "getStarted": "Get Started",
+        "welcome": "Welcome to WinstantPay",
+        "welcomeDesc": "Your mobile wallet for global payments and currency exchange.",
+        "dashboardTitle": "Your Balances",
+        "dashboardDesc": "View all your currency accounts at a glance. Tap any account to see its statement.",
+        "payTitle": "Send Payments",
+        "payDesc": "Send instant payments to anyone with a PayID. Fast, secure, and easy.",
+        "exchangeTitle": "Exchange Currencies",
+        "exchangeDesc": "Convert between currencies at live market rates. Get quotes and book deals instantly.",
+        "securityTitle": "Secure Transactions",
+        "securityDesc": "Protect your payments and exchanges with a 6-digit PIN code."
     }
 }

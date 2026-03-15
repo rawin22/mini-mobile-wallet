@@ -2,12 +2,15 @@ import {
   View, Text, FlatList, StyleSheet, ActivityIndicator, RefreshControl,
 } from 'react-native';
 import { useState, useEffect, useCallback } from 'react';
+import { useLanguage } from '../../../src/hooks/useLanguage';
 import { fxHistoryService } from '../../../src/api/fx-history.service';
 import { formatCurrency, formatDateTime } from '../../../src/utils/formatters';
 import type { FxDealSearchRecord } from '../../../src/types/fx.types';
+import { CurrencyIcon } from '../../../components/ui';
 import { colors, spacing, typography, radius } from '../../../src/theme';
 
 export default function ConvertHistoryScreen() {
+  const { t } = useLanguage();
   const [deals, setDeals] = useState<FxDealSearchRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -20,12 +23,12 @@ export default function ConvertHistoryScreen() {
       const response = await fxHistoryService.searchDeals();
       setDeals(response.fxDeals ?? []);
     } catch {
-      setError('Could not load FX history. Pull to refresh.');
+      setError(t('history.exchangeLoadError') || 'Could not load FX history. Pull to refresh.');
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => { fetchDeals(); }, [fetchDeals]);
 
@@ -42,17 +45,23 @@ export default function ConvertHistoryScreen() {
       </View>
       <View style={styles.amountRow}>
         <View style={styles.amountBox}>
-          <Text style={styles.amountLabel}>Bought</Text>
-          <Text style={[styles.amountValue, styles.credit]}>
-            +{formatCurrency(item.buyAmount)} {item.buyCurrencyCode}
-          </Text>
+          <CurrencyIcon code={item.buyCurrencyCode} size={24} />
+          <View>
+            <Text style={styles.amountLabel}>{t('history.buy') || 'Bought'}</Text>
+            <Text style={[styles.amountValue, styles.credit]}>
+              +{formatCurrency(item.buyAmount)} {item.buyCurrencyCode}
+            </Text>
+          </View>
         </View>
         <Text style={styles.arrow}>⇄</Text>
         <View style={[styles.amountBox, styles.amountRight]}>
-          <Text style={styles.amountLabel}>Sold</Text>
-          <Text style={[styles.amountValue, styles.debit]}>
-            -{formatCurrency(item.sellAmount)} {item.sellCurrencyCode}
-          </Text>
+          <View style={{ alignItems: 'flex-end' }}>
+            <Text style={styles.amountLabel}>{t('history.sell') || 'Sold'}</Text>
+            <Text style={[styles.amountValue, styles.debit]}>
+              -{formatCurrency(item.sellAmount)} {item.sellCurrencyCode}
+            </Text>
+          </View>
+          <CurrencyIcon code={item.sellCurrencyCode} size={24} />
         </View>
       </View>
     </View>
@@ -81,10 +90,10 @@ export default function ConvertHistoryScreen() {
         />
       }
       ListHeaderComponent={
-        <Text style={styles.title}>FX History</Text>
+        <Text style={styles.title}>{t('history.exchangeTitle') || 'FX History'}</Text>
       }
       ListEmptyComponent={
-        <Text style={styles.empty}>{error || 'No FX deals found.'}</Text>
+        <Text style={styles.empty}>{error || t('history.noDeals') || 'No FX deals found.'}</Text>
       }
       ItemSeparatorComponent={() => <View style={styles.separator} />}
     />
@@ -109,8 +118,8 @@ const styles = StyleSheet.create({
   rate: { fontSize: typography.caption, color: colors.textSecondary },
 
   amountRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  amountBox: { flex: 1 },
-  amountRight: { alignItems: 'flex-end' },
+  amountBox: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  amountRight: { justifyContent: 'flex-end' },
   amountLabel: { fontSize: typography.caption, color: colors.textMuted },
   amountValue: { fontSize: typography.small, fontWeight: '700', marginTop: 2 },
   credit: { color: colors.accent },

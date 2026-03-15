@@ -64,6 +64,7 @@
         "usernameExists": "Le nom d'utilisateur existe déjà. Veuillez en choisir un autre.",
         "signupSuccess": "Compte créé avec succès.",
         "signupFailed": "Échec de l'inscription. Veuillez réessayer.",
+        "rememberMe": "Se souvenir de moi",
         "notary": {
             "sx": "WinstantGold SX - Sint Maarten",
             "us": "WinstantGold US - États-Unis",
@@ -379,5 +380,31 @@
                 }
             }
         }
+    },
+    "pin": {
+        "setPin": "Définir le PIN",
+        "changePin": "Changer le PIN",
+        "enterPin": "Entrer le PIN",
+        "confirmPin": "Confirmer le PIN",
+        "pinMismatch": "Les PIN ne correspondent pas. Réessayez.",
+        "pinSet": "Le PIN a été défini avec succès.",
+        "incorrectPin": "PIN incorrect",
+        "tooManyAttempts": "Trop de tentatives. Veuillez patienter.",
+        "forgotPin": "PIN oublié ?"
+    },
+    "onboarding": {
+        "skip": "Passer",
+        "next": "Suivant",
+        "getStarted": "Commencer",
+        "welcome": "Bienvenue sur WinstantPay",
+        "welcomeDesc": "Votre portefeuille mobile pour les paiements mondiaux et le change de devises.",
+        "dashboardTitle": "Vos soldes",
+        "dashboardDesc": "Consultez tous vos comptes en devises d'un seul coup d'œil. Touchez un compte pour voir son relevé.",
+        "payTitle": "Envoyer des paiements",
+        "payDesc": "Envoyez des paiements instantanés à quiconque possède un PayID. Rapide, sécurisé et facile.",
+        "exchangeTitle": "Changer des devises",
+        "exchangeDesc": "Convertissez entre devises aux taux du marché en direct. Obtenez des cours et validez des opérations instantanément.",
+        "securityTitle": "Transactions sécurisées",
+        "securityDesc": "Protégez vos paiements et changes avec un code PIN à 6 chiffres."
     }
 }

@@ -105,6 +105,7 @@ export default function SignupScreen() {
       await signupService.register({
         username: form.username.trim(),
         password: form.password,
+        confirmPassword: form.confirmPassword,
         email: form.email.trim(),
         cellphone: form.cellphone.trim(),
         firstName: form.firstName.trim(),

@@ -1,14 +1,17 @@
 import {
   View, Text, FlatList, StyleSheet, ActivityIndicator,
-  RefreshControl, Pressable,
+  RefreshControl,
 } from 'react-native';
 import { useState, useEffect, useCallback } from 'react';
+import { useLanguage } from '../../../src/hooks/useLanguage';
 import { paymentHistoryService } from '../../../src/api/payment-history.service';
 import { formatCurrency, formatDateTime } from '../../../src/utils/formatters';
 import type { PaymentSearchRecord } from '../../../src/types/payment.types';
+import { CurrencyIcon } from '../../../components/ui';
 import { colors, spacing, typography, radius } from '../../../src/theme';
 
 export default function PaymentHistoryScreen() {
+  const { t } = useLanguage();
   const [payments, setPayments] = useState<PaymentSearchRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -21,12 +24,12 @@ export default function PaymentHistoryScreen() {
       const response = await paymentHistoryService.searchPayments();
       setPayments(response.records?.payments ?? []);
     } catch {
-      setError('Could not load payments. Pull to refresh.');
+      setError(t('history.paymentsLoadError') || 'Could not load payments. Pull to refresh.');
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => { fetchPayments(); }, [fetchPayments]);
 
@@ -40,6 +43,7 @@ export default function PaymentHistoryScreen() {
   const renderItem = ({ item }: { item: PaymentSearchRecord }) => (
     <View style={styles.card}>
       <View style={styles.row}>
+        <CurrencyIcon code={item.currencyCode} size={32} />
         <View style={styles.flex}>
           <Text style={styles.ref} numberOfLines={1}>{item.paymentReference}</Text>
           <Text style={styles.parties} numberOfLines={1}>
@@ -87,10 +91,10 @@ export default function PaymentHistoryScreen() {
         />
       }
       ListHeaderComponent={
-        <Text style={styles.title}>Payment History</Text>
+        <Text style={styles.title}>{t('history.paymentsTitle') || 'Payment History'}</Text>
       }
       ListEmptyComponent={
-        <Text style={styles.empty}>{error || 'No payments found.'}</Text>
+        <Text style={styles.empty}>{error || t('history.noPayments') || 'No payments found.'}</Text>
       }
       ItemSeparatorComponent={() => <View style={styles.separator} />}
     />
@@ -109,7 +113,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     padding: spacing.md,
   },
-  row: { flexDirection: 'row', gap: spacing.sm },
+  row: { flexDirection: 'row', gap: spacing.sm, alignItems: 'center' },
   flex: { flex: 1 },
   right: { alignItems: 'flex-end', gap: spacing.xs },
   ref: { fontSize: typography.small, fontWeight: '600', color: colors.textPrimary },
