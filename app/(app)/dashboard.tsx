@@ -17,7 +17,7 @@ import type { CustomerBalanceData } from '../../src/types/balance.types';
 import type { FxCurrency, FxDealSearchRecord } from '../../src/types/fx.types';
 import { formatCurrency, formatDateTime } from '../../src/utils/formatters';
 import { storage } from '../../src/utils/storage';
-import { CurrencyIcon } from '../../components/ui';
+import { CurrencyIcon, PinEntryModal } from '../../components/ui';
 import { colors, spacing, typography, radius, gradients, shadows } from '../../src/theme';
 
 interface RecentRecipient {
@@ -61,6 +61,9 @@ export default function DashboardScreen() {
   const [buyCurrencies, setBuyCurrencies] = useState<FxCurrency[]>([]);
   const [showSellPicker, setShowSellPicker] = useState(false);
   const [showBuyPicker, setShowBuyPicker] = useState(false);
+  const [quickExchangeLoading, setQuickExchangeLoading] = useState(false);
+  const [quickExchangeResult, setQuickExchangeResult] = useState('');
+  const [showPinModal, setShowPinModal] = useState(false);
 
   // Load persisted filter state
   useEffect(() => {
@@ -216,6 +219,50 @@ export default function DashboardScreen() {
     const timer = setTimeout(getConverterQuote, 600);
     return () => clearTimeout(timer);
   }, [getConverterQuote]);
+
+  // Quick Exchange: get real quote + book in one go
+  const handleQuickExchange = async () => {
+    if (!sellCcy || !buyCcy || sellCcy === buyCcy) return;
+    const amt = parseFloat(converterAmount);
+    if (isNaN(amt) || amt <= 0) return;
+
+    setQuickExchangeLoading(true);
+    setQuickExchangeResult('');
+    try {
+      // Step 1: Get a real (non-calculator) quote
+      const quoteRes = await fxService.getQuote({
+        sellCurrencyCode: sellCcy,
+        buyCurrencyCode: buyCcy,
+        amount: amt,
+        amountCurrencyCode: sellCcy,
+        dealType: 'SPOT',
+        windowOpenDate: '',
+        finalValueDate: '',
+        isForCurrencyCalculator: false,
+      });
+      if (quoteRes.problems) {
+        setQuickExchangeResult(`Error: ${quoteRes.problems}`);
+        return;
+      }
+      // Step 2: Book immediately
+      const bookRes = await fxService.bookDeal(quoteRes.quote.quoteId);
+      if (bookRes.problems) {
+        setQuickExchangeResult(`Error: ${bookRes.problems}`);
+        return;
+      }
+      const ref = bookRes.fxDepositData.fxDealReference;
+      setQuickExchangeResult(`Done! ${formatCurrency(parseFloat(quoteRes.quote.sellAmount))} ${sellCcy} → ${formatCurrency(parseFloat(quoteRes.quote.buyAmount))} ${buyCcy} (${ref})`);
+      console.log('[Dashboard] Quick exchange booked:', ref);
+      // Refresh balances and deals
+      fetchBalances();
+      fetchRecentDeals();
+    } catch (err) {
+      console.log('[Dashboard] Quick exchange failed:', err);
+      setQuickExchangeResult('Exchange failed. Please try again.');
+    } finally {
+      setQuickExchangeLoading(false);
+    }
+  };
 
   // Filter balances
   const filteredBalances = balances.filter((b) => {
@@ -465,9 +512,40 @@ export default function DashboardScreen() {
                 )}
               </View>
             </View>
+
+            {/* Quick Exchange result */}
+            {quickExchangeResult !== '' && (
+              <Text style={styles.quickExchangeResult}>{quickExchangeResult}</Text>
+            )}
+
+            {/* Exchange button */}
+            <Pressable
+              style={[styles.exchangeBtn, (quickExchangeLoading || !converterResult || converterResult === '--' || sellCcy === buyCcy) && styles.exchangeBtnDisabled]}
+              disabled={quickExchangeLoading || !converterResult || converterResult === '--' || sellCcy === buyCcy}
+              onPress={() => {
+                if (storage.hasPin()) {
+                  setShowPinModal(true);
+                } else {
+                  handleQuickExchange();
+                }
+              }}
+            >
+              {quickExchangeLoading ? (
+                <ActivityIndicator size="small" color={colors.textPrimary} />
+              ) : (
+                <Text style={styles.exchangeBtnText}>Exchange Now</Text>
+              )}
+            </Pressable>
           </View>
         </View>
       )}
+
+      <PinEntryModal
+        visible={showPinModal}
+        title="Enter PIN to Exchange"
+        onSuccess={() => { setShowPinModal(false); handleQuickExchange(); }}
+        onCancel={() => setShowPinModal(false)}
+      />
 
       {/* ── Sell Currency Picker Modal ── */}
       <Modal visible={showSellPicker} transparent animationType="fade">
@@ -634,6 +712,13 @@ const styles = StyleSheet.create({
     minHeight: 40, justifyContent: 'center',
   },
   converterResultText: { fontSize: typography.body, fontWeight: '600', color: colors.accent },
+  exchangeBtn: {
+    backgroundColor: colors.primary, borderRadius: radius.md,
+    padding: spacing.sm, alignItems: 'center', marginTop: spacing.xs,
+  },
+  exchangeBtnDisabled: { opacity: 0.4 },
+  exchangeBtnText: { color: colors.textPrimary, fontSize: typography.small, fontWeight: '700' },
+  quickExchangeResult: { fontSize: typography.caption, color: colors.accent, textAlign: 'center' },
 
   // Modals
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', padding: spacing.xl },

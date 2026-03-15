@@ -80,7 +80,11 @@
         "available": "Disponible",
         "reserved": "Réservé",
         "total": "Total",
-        "viewStatement": "Voir le relevé →"
+        "viewStatement": "Voir le relevé →",
+        "equivalent": "Équivalent USD",
+        "favoritesOnly": "Favoris uniquement",
+        "quickPay": "Paiement rapide",
+        "converter": "Convertisseur de devises"
     },
     "statement": {
         "title": "Relevé de compte",

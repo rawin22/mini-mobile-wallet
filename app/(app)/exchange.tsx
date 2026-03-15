@@ -9,6 +9,7 @@ import { balanceService } from '../../src/api/balance.service';
 import { formatCurrency, formatCountdown } from '../../src/utils/formatters';
 import { storage } from '../../src/utils/storage';
 import type { FxCurrency, FxQuote } from '../../src/types/fx.types';
+import type { CustomerBalanceData } from '../../src/types/balance.types';
 import { colors, spacing, typography, radius } from '../../src/theme';
 import { useLanguage } from '../../src/hooks/useLanguage';
 import { useAuth } from '../../src/hooks/useAuth';
@@ -28,6 +29,7 @@ export default function ExchangeScreen() {
 
   const [buyCurrencies, setBuyCurrencies] = useState<FxCurrency[]>([]);
   const [sellCurrencies, setSellCurrencies] = useState<FxCurrency[]>([]);
+  const [balances, setBalances] = useState<CustomerBalanceData[]>([]);
   const [buyCcy, setBuyCcy] = useState('');
   const [sellCcy, setSellCcy] = useState('');
   const [amount, setAmount] = useState('');
@@ -50,8 +52,10 @@ export default function ExchangeScreen() {
         ]);
         const buys = buyRes.currencies ?? [];
         const allSells = sellRes.currencies ?? [];
+        const allBalances = balRes.balances ?? [];
+        setBalances(allBalances);
         const balanceCodes = new Set(
-          (balRes.balances ?? []).filter((b) => b.balanceAvailable > 0).map((b) => b.currencyCode),
+          allBalances.filter((b) => b.balanceAvailable > 0).map((b) => b.currencyCode),
         );
         // Only show sell currencies the user actually holds
         const sells = allSells.filter((c) => balanceCodes.has(c.currencyCode));
@@ -197,6 +201,12 @@ export default function ExchangeScreen() {
             </Text>
             <Text style={styles.chevron}>▾</Text>
           </Pressable>
+          {sellCcy !== '' && (() => {
+            const bal = balances.find((b) => b.currencyCode === sellCcy);
+            return bal ? (
+              <Text style={styles.availableText}>Available: {formatCurrency(bal.balanceAvailable)} {sellCcy}</Text>
+            ) : null;
+          })()}
 
           <Text style={styles.label}>{t('fx.buyCurrency') || 'To:'}</Text>
           <Pressable style={styles.picker} onPress={() => setActivePicker('buy')}>
@@ -382,6 +392,7 @@ const styles = StyleSheet.create({
   pickerName: { flex: 1, fontSize: typography.small, color: colors.textSecondary },
   chevron: { color: colors.primary },
   warning: { fontSize: typography.caption, color: colors.danger },
+  availableText: { fontSize: typography.caption, color: colors.textSecondary, marginTop: 2 },
 
   input: {
     backgroundColor: colors.surfaceAlt, borderWidth: 1, borderColor: colors.border,

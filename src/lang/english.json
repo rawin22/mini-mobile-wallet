@@ -80,7 +80,11 @@
         "available": "Available",
         "reserved": "Reserved",
         "total": "Total",
-        "viewStatement": "View Statement →"
+        "viewStatement": "View Statement →",
+        "equivalent": "USD Equivalent",
+        "favoritesOnly": "Favorites only",
+        "quickPay": "Quick Pay",
+        "converter": "Currency Converter"
     },
     "statement": {
         "title": "Account Statement",
