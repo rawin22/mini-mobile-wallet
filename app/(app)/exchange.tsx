@@ -5,6 +5,7 @@ import {
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { fxService } from '../../src/api/fx.service';
+import { balanceService } from '../../src/api/balance.service';
 import { formatCurrency, formatCountdown } from '../../src/utils/formatters';
 import { storage } from '../../src/utils/storage';
 import type { FxCurrency, FxQuote } from '../../src/types/fx.types';
@@ -38,23 +39,29 @@ export default function ExchangeScreen() {
   const [depositRef, setDepositRef] = useState('');
   const [showPinModal, setShowPinModal] = useState(false);
 
-  // Load currencies on mount
+  // Load currencies on mount — filter sell (From) to only currencies with balance
   useEffect(() => {
     (async () => {
       try {
-        const [buyRes, sellRes] = await Promise.all([
+        const [buyRes, sellRes, balRes] = await Promise.all([
           fxService.getBuyCurrencies(),
           fxService.getSellCurrencies(),
+          user?.organizationId ? balanceService.getBalances(user.organizationId) : Promise.resolve({ balances: [] }),
         ]);
         const buys = buyRes.currencies ?? [];
-        const sells = sellRes.currencies ?? [];
+        const allSells = sellRes.currencies ?? [];
+        const balanceCodes = new Set(
+          (balRes.balances ?? []).filter((b) => b.balanceAvailable > 0).map((b) => b.currencyCode),
+        );
+        // Only show sell currencies the user actually holds
+        const sells = allSells.filter((c) => balanceCodes.has(c.currencyCode));
         setBuyCurrencies(buys);
-        setSellCurrencies(sells);
+        setSellCurrencies(sells.length > 0 ? sells : allSells);
         // Default sell (From) to user's base currency
         const baseCcy = user?.baseCurrencyCode || '';
         const defaultSell = sells.find((c) => c.currencyCode === baseCcy)
           ? baseCcy
-          : sells[0]?.currencyCode ?? '';
+          : sells[0]?.currencyCode ?? allSells[0]?.currencyCode ?? '';
         setSellCcy(defaultSell);
         setAmountCcy(defaultSell);
         // Default buy (To) to first currency that differs from sell
@@ -64,14 +71,22 @@ export default function ExchangeScreen() {
         setError('Could not load currencies.');
       }
     })();
-  }, []);
+  }, [user?.organizationId]);
 
   // Countdown timer when quote is active
+  // Use relative seconds between quoteTime and expirationTime (avoids timezone issues)
   useEffect(() => {
     if (step !== 'quote' || !quote) return;
+    const quoteAt = new Date(quote.quoteTime).getTime();
     const expiresAt = new Date(quote.expirationTime).getTime();
+    let totalSeconds = Math.floor((expiresAt - quoteAt) / 1000);
+    // Fallback: if parsed times are nonsensical, default to 60 seconds
+    if (isNaN(totalSeconds) || totalSeconds <= 0) totalSeconds = 60;
+    console.log('[FX] Quote countdown:', totalSeconds, 's | quoteTime:', quote.quoteTime, '| expirationTime:', quote.expirationTime);
+    const startedAt = Date.now();
     const tick = () => {
-      const remaining = Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
+      const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+      const remaining = Math.max(0, totalSeconds - elapsed);
       setSecondsRemaining(remaining);
       if (remaining === 0) setStep('expired');
     };

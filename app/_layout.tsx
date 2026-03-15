@@ -16,31 +16,34 @@ function AuthGate() {
     if (isLoading) return;
 
     const firstSegment = (segments[0] as string) ?? '';
+    // Skip routing when segments haven't resolved yet (first render)
+    if (firstSegment === '') {
+      if (isAuthenticated) {
+        router.replace('/(app)/dashboard' as any);
+      } else {
+        router.replace('/(auth)/login' as any);
+      }
+      return;
+    }
+
     const inAppGroup = firstSegment === '(app)';
     const inAuthGroup = firstSegment === '(auth)';
     const inOnboardingGroup = firstSegment === '(onboarding)';
-
-    console.log('[AuthGate] segment0:', JSON.stringify(firstSegment),
-      '| isAuthenticated:', isAuthenticated);
 
     // Don't redirect if user is viewing the intro tour
     if (inOnboardingGroup) return;
 
     // Authenticated → must be in app group, otherwise redirect to dashboard
     if (isAuthenticated && !inAppGroup) {
-      console.log('[AuthGate] Authenticated but not in app, redirecting to dashboard');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       router.replace('/(app)/dashboard' as any);
       return;
     }
 
     // Not authenticated → must be in auth group, otherwise redirect to login
     if (!isAuthenticated && !inAuthGroup) {
-      console.log('[AuthGate] Not authenticated, redirecting to login');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       router.replace('/(auth)/login' as any);
     }
-  }, [isAuthenticated, isLoading, segments, router]);
+  }, [isAuthenticated, isLoading]);
 
   return (
     <Stack screenOptions={{ headerShown: false }}>

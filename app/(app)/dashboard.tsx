@@ -12,9 +12,10 @@ import { useLanguage } from '../../src/hooks/useLanguage';
 import { balanceService } from '../../src/api/balance.service';
 import { paymentHistoryService } from '../../src/api/payment-history.service';
 import { fxService } from '../../src/api/fx.service';
+import { fxHistoryService } from '../../src/api/fx-history.service';
 import type { CustomerBalanceData } from '../../src/types/balance.types';
-import type { FxCurrency } from '../../src/types/fx.types';
-import { formatCurrency } from '../../src/utils/formatters';
+import type { FxCurrency, FxDealSearchRecord } from '../../src/types/fx.types';
+import { formatCurrency, formatDateTime } from '../../src/utils/formatters';
 import { storage } from '../../src/utils/storage';
 import { CurrencyIcon } from '../../components/ui';
 import { colors, spacing, typography, radius, gradients, shadows } from '../../src/theme';
@@ -46,6 +47,9 @@ export default function DashboardScreen() {
   // Recent recipients
   const [recentRecipients, setRecentRecipients] = useState<RecentRecipient[]>([]);
 
+  // Recent FX deals
+  const [recentDeals, setRecentDeals] = useState<FxDealSearchRecord[]>([]);
+
   // Converter state
   const [sellCcy, setSellCcy] = useState('');
   const [buyCcy, setBuyCcy] = useState('');
@@ -57,8 +61,6 @@ export default function DashboardScreen() {
   const [buyCurrencies, setBuyCurrencies] = useState<FxCurrency[]>([]);
   const [showSellPicker, setShowSellPicker] = useState(false);
   const [showBuyPicker, setShowBuyPicker] = useState(false);
-
-  console.log('[Dashboard] Screen mounted, user:', user?.userName ?? 'none');
 
   // Load persisted filter state
   useEffect(() => {
@@ -106,7 +108,7 @@ export default function DashboardScreen() {
           seen.add(alias);
           recipients.push({
             alias,
-            name: p.toCustomerName || alias,
+            name: alias,
             currencyCode: p.currencyCode,
           });
           if (recipients.length >= 5) break;
@@ -130,10 +132,13 @@ export default function DashboardScreen() {
         fxService.getSellCurrencies(),
         fxService.getBuyCurrencies(),
       ]);
-      const sell = sellRes.currencies ?? [];
+      const allSell = sellRes.currencies ?? [];
       const buy = buyRes.currencies ?? [];
-      console.log('[Dashboard] FX sell currencies:', sell.length, '| buy:', buy.length);
-      setSellCurrencies(sell);
+      // Only show sell currencies the user actually holds
+      const balanceCodes = new Set(balances.filter((b) => b.balanceAvailable > 0).map((b) => b.currencyCode));
+      const sell = balanceCodes.size > 0 ? allSell.filter((c) => balanceCodes.has(c.currencyCode)) : allSell;
+      console.log('[Dashboard] FX sell currencies:', sell.length, '(of', allSell.length, ') | buy:', buy.length);
+      setSellCurrencies(sell.length > 0 ? sell : allSell);
       setBuyCurrencies(buy);
 
       // Default: sell = user's baseCurrency, buy = first different one
@@ -149,11 +154,24 @@ export default function DashboardScreen() {
     }
   }, [user]);
 
+  // Fetch recent FX deals (last 5)
+  const fetchRecentDeals = useCallback(async () => {
+    if (!user) return;
+    try {
+      const response = await fxHistoryService.searchDeals({ pageIndex: 0, pageSize: 5 });
+      setRecentDeals(response.fxDeals ?? []);
+      console.log('[Dashboard] Recent FX deals:', (response.fxDeals ?? []).length);
+    } catch (err) {
+      console.log('[Dashboard] Could not load recent FX deals:', err);
+    }
+  }, [user]);
+
   useEffect(() => {
     if (!user?.organizationId) return;
     fetchBalances();
     fetchRecipients();
     fetchFxCurrencies();
+    fetchRecentDeals();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.organizationId]);
 
@@ -225,6 +243,7 @@ export default function DashboardScreen() {
   const onRefresh = () => {
     fetchBalances(true);
     fetchRecipients();
+    fetchRecentDeals();
   };
 
   if (isLoading) {
@@ -328,7 +347,12 @@ export default function DashboardScreen() {
       {/* ── Quick Pay: Recent Recipients ── */}
       {recentRecipients.length > 0 && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('dashboard.quickPay') || 'QuickPay'}</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>{t('dashboard.quickPay') || 'QuickPay'}</Text>
+            <Pressable onPress={() => router.push('/(app)/history/payments' as any)}>
+              <Text style={styles.viewAllLink}>View All</Text>
+            </Pressable>
+          </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.recipientRow}>
             {recentRecipients.map((r) => (
               <Pressable
@@ -347,6 +371,39 @@ export default function DashboardScreen() {
           </ScrollView>
         </View>
       )}
+
+      {/* ── Recent Exchanges ── */}
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Recent Exchanges</Text>
+          <Pressable onPress={() => router.push('/(app)/history/convert' as any)}>
+            <Text style={styles.viewAllLink}>View All</Text>
+          </Pressable>
+        </View>
+        {recentDeals.length === 0 ? (
+          <Pressable style={styles.dealCard} onPress={() => router.push('/(app)/exchange' as any)}>
+            <Text style={styles.dealDate}>No recent exchanges. Tap to make one.</Text>
+          </Pressable>
+        ) : (
+          recentDeals.map((deal) => (
+            <View key={deal.fxDealId} style={styles.dealCard}>
+              <View style={styles.dealTop}>
+                <View style={styles.dealCcyRow}>
+                  <CurrencyIcon code={deal.sellCurrencyCode} size={20} />
+                  <Text style={styles.dealDebit}>-{formatCurrency(deal.sellAmount ?? 0)} {deal.sellCurrencyCode}</Text>
+                  <Ionicons name="arrow-forward" size={14} color={colors.textMuted} />
+                  <Text style={styles.dealCredit}>+{formatCurrency(deal.buyAmount ?? 0)} {deal.buyCurrencyCode}</Text>
+                  <CurrencyIcon code={deal.buyCurrencyCode} size={20} />
+                </View>
+              </View>
+              <View style={styles.dealBottom}>
+                <Text style={styles.dealDate}>{formatDateTime(deal.bookedTime)}</Text>
+                <Text style={styles.dealRate}>{deal.bookedRateTextWithCurrencyCodes || `Rate: ${deal.bookedRate}`}</Text>
+              </View>
+            </View>
+          ))
+        )}
+      </View>
 
       {/* ── Currency Converter Widget ── */}
       {sellCurrencies.length > 0 && buyCurrencies.length > 0 && (
@@ -510,10 +567,28 @@ const styles = StyleSheet.create({
 
   // Sections
   section: { marginTop: spacing.sm },
+  sectionHeader: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    marginBottom: spacing.sm, paddingHorizontal: spacing.xs,
+  },
   sectionTitle: {
     fontSize: typography.small, fontWeight: '700', color: colors.textMuted,
     textTransform: 'uppercase', letterSpacing: 1, marginBottom: spacing.sm, paddingHorizontal: spacing.xs,
   },
+  viewAllLink: { fontSize: typography.caption, color: colors.primary, fontWeight: '600' },
+
+  // Recent Deals
+  dealCard: {
+    backgroundColor: colors.surface, borderRadius: radius.md, borderWidth: 1,
+    borderColor: colors.border, padding: spacing.sm, marginBottom: spacing.xs,
+  },
+  dealTop: {},
+  dealCcyRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  dealDebit: { fontSize: typography.small, fontWeight: '600', color: colors.danger, flex: 1 },
+  dealCredit: { fontSize: typography.small, fontWeight: '600', color: colors.accent, flex: 1, textAlign: 'right' },
+  dealBottom: { flexDirection: 'row', justifyContent: 'space-between', marginTop: spacing.xs },
+  dealDate: { fontSize: typography.caption, color: colors.textMuted },
+  dealRate: { fontSize: typography.caption, color: colors.textSecondary },
 
   // Quick Pay
   recipientRow: { gap: spacing.md, paddingHorizontal: spacing.xs },
