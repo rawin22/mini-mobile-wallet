@@ -22,7 +22,7 @@ interface SignupConfig {
   NOTARY_NODES: NotaryNodeConfig[];
 }
 
-export type AppEnvironmentId = 'WKYC_BETA' | 'GPWEB_BETA' | 'GPWEB_PRODUCTION';
+export type AppEnvironmentId = 'WKYC_BETA' | 'GPWEB_BETA' | 'GPWEB';
 
 interface EnvironmentConfig {
   id: AppEnvironmentId;
@@ -96,14 +96,14 @@ const APP_ENVIRONMENT_CONFIGS: Record<AppEnvironmentId, EnvironmentConfig> = {
   GPWEB_BETA: {
     id: 'GPWEB_BETA',
     label: 'GPWEB-BETA',
-    baseUrl: 'https://www.bizcurrency.com:20300',
-    callerId: '819640E9-8DF1-4DB9-B13B-E9DCDDEEBA58',
+    baseUrl: env('GPWEB_BETA_URL', 'https://www.bizcurrency.com:20200'),
+    callerId: env('GPWEB_BETA_CALLER_ID', '819640E9-8DF1-4DB9-B13B-E9DCDDEEBA58'),
     signup: {
-      BANK_USERNAME: env('GPWEB_BETA_BANK_USERNAME'),
-      BANK_PASSWORD: env('GPWEB_BETA_BANK_PASSWORD'),
-      ACCOUNT_REPRESENTATIVE_ID: '93b92051-5061-eb11-913d-3ee1a118192f',
-      CUSTOMER_TEMPLATE_ID: 'd7bccd8b-5261-eb11-913d-3ee1a118192f',
-      ACCESS_RIGHT_TEMPLATE_ID: 'e12b3d13-d213-4cad-bbbc-f3a8ca65e533',
+      BANK_USERNAME: env('GPWEB_BETA_BANK_USERNAME', 'demoview'),
+      BANK_PASSWORD: env('GPWEB_BETA_BANK_PASSWORD', 'password'),
+      ACCOUNT_REPRESENTATIVE_ID: env('GPWEB_BETA_ACCOUNT_REPRESENTATIVE_ID', '93b92051-5061-eb11-913d-3ee1a118192f'),
+      CUSTOMER_TEMPLATE_ID: env('GPWEB_BETA_CUSTOMER_TEMPLATE_ID', 'd7bccd8b-5261-eb11-913d-3ee1a118192f'),
+      ACCESS_RIGHT_TEMPLATE_ID: env('GPWEB_BETA_ACCESS_RIGHT_TEMPLATE_ID', 'e12b3d13-d213-4cad-bbbc-f3a8ca65e533'),
       DEFAULT_COUNTRY_CODE: 'HK',
       DEFAULT_REGISTERING_EMAIL: 'register@worldkyc.com',
       REFERRED_BY_PLATFORM: 'WorldKYC Signup',
@@ -116,17 +116,17 @@ const APP_ENVIRONMENT_CONFIGS: Record<AppEnvironmentId, EnvironmentConfig> = {
       ], 'HK'),
     },
   },
-  GPWEB_PRODUCTION: {
-    id: 'GPWEB_PRODUCTION',
-    label: 'GPWEB-PRODUCTION',
-    baseUrl: 'https://www.bizcurrency.com:20300',
-    callerId: '819640E9-8DF1-4DB9-B13B-E9DCDDEEBA58',
+  GPWEB: {
+    id: 'GPWEB',
+    label: 'GPWEB',
+    baseUrl: env('GPWEB_URL', 'https://www.bizcurrency.com:20300'),
+    callerId: env('GPWEB_CALLER_ID', '819640E9-8DF1-4DB9-B13B-E9DCDDEEBA58'),
     signup: {
-      BANK_USERNAME: env('GPWEB_PRODUCTION_BANK_USERNAME') || env('GPWEB_PROD_BANK_USERNAME'),
-      BANK_PASSWORD: env('GPWEB_PRODUCTION_BANK_PASSWORD') || env('GPWEB_PROD_BANK_PASSWORD'),
-      ACCOUNT_REPRESENTATIVE_ID: '93b92051-5061-eb11-913d-3ee1a118192f',
-      CUSTOMER_TEMPLATE_ID: 'd7bccd8b-5261-eb11-913d-3ee1a118192f',
-      ACCESS_RIGHT_TEMPLATE_ID: 'e12b3d13-d213-4cad-bbbc-f3a8ca65e533',
+      BANK_USERNAME: env('GPWEB_BANK_USERNAME', 'demoview'),
+      BANK_PASSWORD: env('GPWEB_BANK_PASSWORD', 'password'),
+      ACCOUNT_REPRESENTATIVE_ID: env('GPWEB_ACCOUNT_REPRESENTATIVE_ID', '93b92051-5061-eb11-913d-3ee1a118192f'),
+      CUSTOMER_TEMPLATE_ID: env('GPWEB_CUSTOMER_TEMPLATE_ID', 'd7bccd8b-5261-eb11-913d-3ee1a118192f'),
+      ACCESS_RIGHT_TEMPLATE_ID: env('GPWEB_ACCESS_RIGHT_TEMPLATE_ID', 'e12b3d13-d213-4cad-bbbc-f3a8ca65e533'),
       DEFAULT_COUNTRY_CODE: 'HK',
       DEFAULT_REGISTERING_EMAIL: 'register@worldkyc.com',
       REFERRED_BY_PLATFORM: 'WorldKYC Signup',

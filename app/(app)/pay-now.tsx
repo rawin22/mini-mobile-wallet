@@ -3,7 +3,7 @@ import {
   ActivityIndicator, ScrollView, Modal, FlatList,
 } from 'react-native';
 import { useState, useEffect } from 'react';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '../../src/hooks/useAuth';
 import { useLanguage } from '../../src/hooks/useLanguage';
 import { instantPaymentService } from '../../src/api/instant-payment.service';
@@ -24,7 +24,8 @@ export default function PayNowScreen() {
   const [step, setStep] = useState<Step>('form');
   const [error, setError] = useState('');
   const [balances, setBalances] = useState<CustomerBalanceData[]>([]);
-  const [toCustomer, setToCustomer] = useState('');
+  const { recipient } = useLocalSearchParams<{ recipient?: string }>();
+  const [toCustomer, setToCustomer] = useState(recipient ?? '');
   const [amount, setAmount] = useState('');
   const [currency, setCurrency] = useState('');
   const [memo, setMemo] = useState('');

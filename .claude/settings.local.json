@@ -5,7 +5,8 @@
       "Bash(source ~/.nvm/nvm.sh)",
       "Bash(nvm use:*)",
       "Bash(npm install:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(find /home/ralf/src/private/winner/wallet-mono-repo/mini-mobile-wallet -name .env* -type f)"
     ]
   }
 }

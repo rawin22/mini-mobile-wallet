@@ -3,8 +3,18 @@ export interface CustomerBalanceData {
   accountNumber: string;
   currencyCode: string;
   balance: number;
-  balanceAvailable: number;
+  balanceText: string;
+  balanceTextWithCurrencyCode: string;
   activeHoldsTotal: number;
+  activeHoldsTotalText: string;
+  activeHoldsTotalTextWithCurrencyCode: string;
+  balanceAvailable: number;
+  balanceAvailableText: string;
+  balanceAvailableTextWithCurrencyCode: string;
+  baseCurrencyCode: string;
+  balanceAvailableBase: number;
+  balanceAvailableBaseText: string;
+  balanceAvailableBaseTextWithCurrencyCode: string;
 }
 
 export interface BalanceResponse {

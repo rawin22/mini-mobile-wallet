@@ -35,6 +35,10 @@ export interface UserSettings {
   lastLoginTime?: string;
   lastPasswordChangedTime?: string;
   wkycId?: string;
+  isCurrencyCalculatorEnabled?: boolean;
+  isBankInstantPaymentFeatureEnabled?: boolean;
+  bankHomePageMessage?: string;
+  baseCountryCode?: string;
 }
 
 export interface AuthResponse {

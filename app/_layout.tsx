@@ -1,66 +1,52 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { LanguageProvider } from '../src/contexts/LanguageContext';
 import { AuthProvider } from '../src/contexts/AuthContext';
 import { useAuth } from '../src/hooks/useAuth';
 import { loadSavedEnvironment } from '../src/api/config';
-import { storage } from '../src/utils/storage';
 
 function AuthGate() {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const segments = useSegments();
-  const [onboardingChecked, setOnboardingChecked] = useState(false);
-  const [needsOnboarding, setNeedsOnboarding] = useState(false);
 
   useEffect(() => { loadSavedEnvironment(); }, []);
 
-  // Check onboarding status — called on mount and can be re-invoked
-  const checkOnboarding = useCallback(async () => {
-    const completed = await storage.isOnboardingCompleted();
-    console.log('[AuthGate] Onboarding completed?', completed);
-    setNeedsOnboarding(!completed);
-    setOnboardingChecked(true);
-  }, []);
-
-  useEffect(() => { checkOnboarding(); }, [checkOnboarding]);
-
   useEffect(() => {
-    if (isLoading || !onboardingChecked) return;
+    if (isLoading) return;
 
-    const inAuthGroup = (segments[0] as string) === '(auth)';
-    const inOnboardingGroup = (segments[0] as string) === '(onboarding)';
+    const firstSegment = (segments[0] as string) ?? '';
+    const inAppGroup = firstSegment === '(app)';
+    const inAuthGroup = firstSegment === '(auth)';
+    const inOnboardingGroup = firstSegment === '(onboarding)';
 
-    console.log('[AuthGate] segments:', segments.join('/'),
-      '| needsOnboarding:', needsOnboarding,
+    console.log('[AuthGate] segment0:', JSON.stringify(firstSegment),
       '| isAuthenticated:', isAuthenticated);
 
-    // If we think onboarding is needed but we're no longer in the
-    // onboarding group, re-read the flag — the intro screen may have
-    // just written it. Don't redirect until the re-read resolves.
-    if (needsOnboarding && !inOnboardingGroup) {
-      checkOnboarding();
+    // Don't redirect if user is viewing the intro tour
+    if (inOnboardingGroup) return;
+
+    // Authenticated → must be in app group, otherwise redirect to dashboard
+    if (isAuthenticated && !inAppGroup) {
+      console.log('[AuthGate] Authenticated but not in app, redirecting to dashboard');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      router.replace('/(app)/dashboard' as any);
       return;
     }
 
-    // Don't redirect if in onboarding
-    if (inOnboardingGroup) return;
-
-    // Only redirect unauthenticated users to login. Authenticated redirects
-    // (login → dashboard, signup → get-verified) are handled by each screen
-    // individually to avoid racing with post-signup navigation.
+    // Not authenticated → must be in auth group, otherwise redirect to login
     if (!isAuthenticated && !inAuthGroup) {
       console.log('[AuthGate] Not authenticated, redirecting to login');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       router.replace('/(auth)/login' as any);
     }
-  }, [isAuthenticated, isLoading, segments, router, onboardingChecked, needsOnboarding, checkOnboarding]);
+  }, [isAuthenticated, isLoading, segments, router]);
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(onboarding)" />
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(app)" />
+      <Stack.Screen name="(onboarding)" />
     </Stack>
   );
 }

@@ -9,4 +9,7 @@ export const STORAGE_KEYS = {
   REMEMBER_ME: 'auth_remember_me',
   PIN_HASH: 'auth_pin_hash',
   ONBOARDING_COMPLETED: 'onboarding_completed',
+  RECENT_RECIPIENTS: 'recent_recipients',
+  FAVORITE_CURRENCIES: 'favorite_currencies',
+  HIDE_ZERO_BALANCES: 'hide_zero_balances',
 } as const;

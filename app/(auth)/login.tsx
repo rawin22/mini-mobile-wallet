@@ -170,6 +170,11 @@ export default function LoginScreen() {
                 <Text style={styles.signupLinkBold}>{t('auth.createAccount') || 'Sign up'}</Text>
               </Text>
             </Pressable>
+
+            <Pressable style={styles.introLink} onPress={() => router.push('/(onboarding)/intro' as any)}>
+              <Ionicons name="play-circle-outline" size={16} color={colors.textMuted} />
+              <Text style={styles.introLinkText}>{t('auth.watchIntro') || 'Watch Intro'}</Text>
+            </Pressable>
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -255,6 +260,9 @@ const styles = StyleSheet.create({
   signupLink: { alignItems: 'center', marginTop: spacing.md },
   signupLinkText: { fontSize: typography.small, color: colors.textSecondary },
   signupLinkBold: { color: colors.primary, fontWeight: '600' },
+
+  introLink: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.xs, marginTop: spacing.sm },
+  introLinkText: { fontSize: typography.caption, color: colors.textMuted },
 
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', padding: spacing.xl },
   modal: { backgroundColor: colors.surface, borderRadius: radius.lg, overflow: 'hidden' },

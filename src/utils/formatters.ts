@@ -11,7 +11,7 @@ export const setFormatterLocale = (languageCode: string): void => {
 };
 
 export const formatCurrency = (amount: number, decimals = 2): string => {
-  return amount.toLocaleString(_activeLocale, {
+  return (amount ?? 0).toLocaleString(_activeLocale, {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   });

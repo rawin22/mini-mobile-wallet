@@ -229,10 +229,7 @@ export default function ProfileScreen() {
 
         <Pressable
           style={[styles.button, styles.tourButton]}
-          onPress={async () => {
-            await storage.resetOnboarding();
-            router.replace('/(onboarding)/intro' as any);
-          }}
+          onPress={() => router.push('/(onboarding)/intro' as any)}
         >
           <Ionicons name="rocket-outline" size={18} color={colors.primary} style={styles.btnIcon} />
           <Text style={[styles.buttonText, { color: colors.primary }]}>App Tour</Text>

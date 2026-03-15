@@ -189,18 +189,83 @@ export const storage = {
     await SecureStore.deleteItemAsync(STORAGE_KEYS.PIN_HASH);
   },
 
-  // ── Onboarding ───────────────────────────────────────────────────────────────
+  // ── Onboarding (dual-write: in-memory + AsyncStorage for reliability) ───────
+
+  _onboardingDone: false as boolean,
 
   async setOnboardingCompleted(): Promise<void> {
-    await AsyncStorage.setItem(STORAGE_KEYS.ONBOARDING_COMPLETED, '1');
+    this._onboardingDone = true;
+    try {
+      await AsyncStorage.setItem(STORAGE_KEYS.ONBOARDING_COMPLETED, '1');
+      console.log('[Storage] Onboarding flag written to AsyncStorage');
+    } catch (e) {
+      console.error('[Storage] Failed to write onboarding flag:', e);
+    }
+    // Verify
+    const check = await AsyncStorage.getItem(STORAGE_KEYS.ONBOARDING_COMPLETED);
+    console.log('[Storage] Onboarding verify read-back:', check);
   },
 
-  async isOnboardingCompleted(): Promise<boolean> {
-    const val = await AsyncStorage.getItem(STORAGE_KEYS.ONBOARDING_COMPLETED);
-    return val === '1';
+  isOnboardingCompleted(): boolean {
+    // In-memory flag is authoritative within a session
+    if (this._onboardingDone) {
+      console.log('[Storage] Onboarding: in-memory flag = true');
+      return true;
+    }
+    // Cold start: read from AsyncStorage synchronously isn't possible,
+    // so we trigger an async read and cache it. First call may return false.
+    return false;
+  },
+
+  async loadOnboardingFlag(): Promise<boolean> {
+    try {
+      const val = await AsyncStorage.getItem(STORAGE_KEYS.ONBOARDING_COMPLETED);
+      console.log('[Storage] Onboarding AsyncStorage read:', val);
+      this._onboardingDone = val === '1';
+    } catch (e) {
+      console.error('[Storage] Failed to read onboarding flag:', e);
+    }
+    return this._onboardingDone;
   },
 
   async resetOnboarding(): Promise<void> {
+    this._onboardingDone = false;
     await AsyncStorage.removeItem(STORAGE_KEYS.ONBOARDING_COMPLETED);
+    console.log('[Storage] Onboarding flag reset');
+  },
+
+  // ── Recent Recipients ─────────────────────────────────────────────────────
+
+  async saveRecentRecipients(recipients: Array<{ alias: string; name: string; currencyCode: string }>): Promise<void> {
+    await AsyncStorage.setItem(STORAGE_KEYS.RECENT_RECIPIENTS, JSON.stringify(recipients));
+  },
+
+  async getRecentRecipients(): Promise<Array<{ alias: string; name: string; currencyCode: string }>> {
+    const raw = await AsyncStorage.getItem(STORAGE_KEYS.RECENT_RECIPIENTS);
+    if (!raw) return [];
+    try { return JSON.parse(raw); } catch { return []; }
+  },
+
+  // ── Favorite Currencies ───────────────────────────────────────────────────
+
+  async saveFavoriteCurrencies(codes: string[]): Promise<void> {
+    await AsyncStorage.setItem(STORAGE_KEYS.FAVORITE_CURRENCIES, JSON.stringify(codes));
+  },
+
+  async getFavoriteCurrencies(): Promise<string[]> {
+    const raw = await AsyncStorage.getItem(STORAGE_KEYS.FAVORITE_CURRENCIES);
+    if (!raw) return [];
+    try { return JSON.parse(raw); } catch { return []; }
+  },
+
+  // ── Hide Zero Balances ────────────────────────────────────────────────────
+
+  async setHideZeroBalances(hide: boolean): Promise<void> {
+    await AsyncStorage.setItem(STORAGE_KEYS.HIDE_ZERO_BALANCES, hide ? '1' : '0');
+  },
+
+  async getHideZeroBalances(): Promise<boolean> {
+    const val = await AsyncStorage.getItem(STORAGE_KEYS.HIDE_ZERO_BALANCES);
+    return val === '1';
   },
 };

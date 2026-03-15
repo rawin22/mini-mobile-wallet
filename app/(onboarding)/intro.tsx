@@ -5,7 +5,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import PagerView from 'react-native-pager-view';
 import { useLanguage } from '../../src/hooks/useLanguage';
-import { storage } from '../../src/utils/storage';
 import { colors, spacing, typography, radius, gradients } from '../../src/theme';
 
 interface Slide {
@@ -70,13 +69,13 @@ export default function OnboardingIntroScreen() {
 
   const isLastSlide = currentPage === SLIDES.length - 1;
 
-  const handleDone = async () => {
-    console.log('[Onboarding] Setting onboarding completed...');
-    await storage.setOnboardingCompleted();
-    // Verify it was actually saved
-    const check = await storage.isOnboardingCompleted();
-    console.log('[Onboarding] Verified saved?', check);
-    router.replace('/(auth)/login' as any);
+  const handleDone = () => {
+    console.log('[Onboarding] Done, navigating back');
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/(auth)/login' as any);
+    }
   };
 
   const handleNext = () => {

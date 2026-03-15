@@ -76,9 +76,9 @@ export default function StatementScreen() {
         </View>
         <View style={styles.rowRight}>
           <Text style={[styles.rowAmount, isCredit ? styles.credit : styles.debit]}>
-            {isCredit ? '+' : '-'}{formatCurrency(isCredit ? item.creditAmount : item.debitAmount)}
+            {isCredit ? '+' : '-'}{formatCurrency((isCredit ? item.creditAmount : item.debitAmount) ?? 0)}
           </Text>
-          <Text style={styles.rowBalance}>{formatCurrency(item.runningBalance)}</Text>
+          <Text style={styles.rowBalance}>{formatCurrency(item.runningBalance ?? 0)}</Text>
         </View>
       </View>
     );
