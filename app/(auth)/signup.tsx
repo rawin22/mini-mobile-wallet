@@ -39,7 +39,6 @@ export default function SignupScreen() {
   const [form, setForm] = useState<FormState>(empty);
   const [envId, setEnvId] = useState<AppEnvironmentId>(getActiveEnvironmentId());
   const [notaryNodes, setNotaryNodes] = useState<NotaryNode[]>([]);
-  const [passwordRegEx, setPasswordRegEx] = useState('');
   const [passwordHint, setPasswordHint] = useState('');
   const [isReferredByRequired, setIsReferredByRequired] = useState(false);
   const [configLoading, setConfigLoading] = useState(true);
@@ -49,6 +48,7 @@ export default function SignupScreen() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [showNotaryPicker, setShowNotaryPicker] = useState(false);
   const [showEnvPicker, setShowEnvPicker] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   const environments = getEnvironmentOptions();
 
@@ -62,7 +62,6 @@ export default function SignupScreen() {
     signupService.loadSignupFormConfig()
       .then((cfg) => {
         setNotaryNodes(cfg.notaryNodes);
-        setPasswordRegEx(cfg.passwordRegEx ?? '');
         setPasswordHint(cfg.passwordRegExMessage ?? '');
         setIsReferredByRequired(cfg.isReferredByRequired ?? false);
         const defaultNode = cfg.notaryNodes.find((n) => n.isDefault) ?? cfg.notaryNodes[0];
@@ -79,19 +78,40 @@ export default function SignupScreen() {
   };
 
   const validate = (): string | null => {
-    if (!form.firstName.trim() || !form.lastName.trim()) return 'First and last name are required.';
-    if (!form.email.trim()) return 'Email is required.';
-    if (!form.username.trim()) return 'Username is required.';
+    const fn = form.firstName.trim();
+    const ln = form.lastName.trim();
+    const em = form.email.trim();
+    const un = form.username.trim();
+
+    // Names
+    if (!fn || !ln) return 'First and last name are required.';
+    if (fn.length < 2) return 'First name must be at least 2 characters.';
+    if (ln.length < 2) return 'Last name must be at least 2 characters.';
+
+    // Email — basic format check
+    if (!em) return 'Email is required.';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) return 'Please enter a valid email address.';
+
+    // Phone — optional but if provided must look reasonable
+    const ph = form.cellphone.trim();
+    if (ph && !/^[+\d][\d\s\-().]{5,}$/.test(ph)) return 'Please enter a valid phone number (e.g. +1 555 000 0000).';
+
+    // Username
+    if (!un) return 'Username is required.';
+    if (un.length < 3) return 'Username must be at least 3 characters.';
+    if (/\s/.test(un)) return 'Username cannot contain spaces.';
+    if (!/^[a-zA-Z0-9._@-]+$/.test(un)) return 'Username can only contain letters, numbers, dots, hyphens, and @.';
+
+    // Password — server validates rules, we just check basics
     if (!form.password) return 'Password is required.';
     if (form.password !== form.confirmPassword) return 'Passwords do not match.';
-    if (passwordRegEx) {
-      try {
-        if (!new RegExp(passwordRegEx).test(form.password))
-          return passwordHint || 'Password does not meet requirements.';
-      } catch { /* skip */ }
-    }
+
+    // Referral
     if (isReferredByRequired && !form.referredBy.trim()) return 'Referred by is required.';
+
+    // Notary
     if (!form.notaryNodeBranchId) return 'Please select a notary node.';
+
     return null;
   };
 
@@ -119,8 +139,8 @@ export default function SignupScreen() {
         await login(form.username.trim(), form.password);
         router.replace('/(app)/get-verified' as any);
       } catch {
-        // Auto-login failed — send to login manually
-        router.replace('/(auth)/login' as any);
+        // Account was created but auto-login failed — show success and let user login manually
+        setSuccess(true);
       }
     } catch (err) {
       let msg = 'Registration failed. Please try again.';
@@ -145,15 +165,27 @@ export default function SignupScreen() {
         <Text style={styles.title}>WinstantPay</Text>
         <Text style={styles.subtitle}>Create your account</Text>
 
-        {!!error && (
+        {success ? (
+          <View style={styles.successBox}>
+            <Text style={styles.successTitle}>Account Created!</Text>
+            <Text style={styles.successText}>
+              Your account has been created successfully. Please sign in with your credentials.
+            </Text>
+            <Pressable style={styles.button} onPress={() => router.replace('/(auth)/login' as any)}>
+              <Text style={styles.buttonText}>Go to Sign In</Text>
+            </Pressable>
+          </View>
+        ) : null}
+
+        {!success && !!error && (
           <View style={styles.errorBox}>
             <Text style={styles.errorText}>{error}</Text>
           </View>
         )}
 
-        {configLoading ? (
+        {!success && configLoading ? (
           <ActivityIndicator size="large" color={colors.primary} style={styles.loader} />
-        ) : (
+        ) : !success ? (
           <View style={styles.card}>
 
             {/* Name row */}
@@ -245,11 +277,13 @@ export default function SignupScreen() {
               }
             </Pressable>
           </View>
-        )}
+        ) : null}
 
-        <Pressable style={styles.loginLink} onPress={() => router.back()}>
-          <Text style={styles.loginLinkText}>Already have an account? <Text style={styles.loginLinkBold}>Sign in</Text></Text>
-        </Pressable>
+        {!success && (
+          <Pressable style={styles.loginLink} onPress={() => router.back()}>
+            <Text style={styles.loginLinkText}>Already have an account? <Text style={styles.loginLinkBold}>Sign in</Text></Text>
+          </Pressable>
+        )}
 
       </ScrollView>
 
@@ -306,6 +340,14 @@ const styles = StyleSheet.create({
   title: { fontSize: 32, fontWeight: 'bold', color: colors.textPrimary, textAlign: 'center', marginTop: spacing.xl },
   subtitle: { fontSize: typography.small, color: colors.textSecondary, textAlign: 'center', marginBottom: spacing.lg },
   loader: { marginTop: spacing.xxl },
+
+  successBox: {
+    backgroundColor: `${colors.accent}22`, borderWidth: 1,
+    borderColor: colors.accent, borderRadius: radius.lg, padding: spacing.lg,
+    alignItems: 'center', gap: spacing.md,
+  },
+  successTitle: { fontSize: typography.heading, fontWeight: 'bold', color: colors.accent },
+  successText: { fontSize: typography.small, color: colors.textSecondary, textAlign: 'center' },
 
   errorBox: {
     backgroundColor: `${colors.danger}22`, borderWidth: 1,
