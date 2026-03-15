@@ -28,7 +28,7 @@ apiClient.interceptors.request.use(
     if (token && config.headers && !config.headers.Authorization) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    console.log(`[API] ${config.method?.toUpperCase()} ${config.url}`);
+    console.log(`[API] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
     return config;
   },
   (error: AxiosError) => Promise.reject(error),
@@ -46,7 +46,7 @@ const processQueue = (error: AxiosError | null = null) => {
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    console.warn(`[API] ${error.response?.status} ${error.config?.url}`, error.response?.data);
+    console.warn(`[API] ERROR ${error.response?.status ?? 'NETWORK'} ${error.config?.baseURL ?? ''}${error.config?.url ?? ''}`, error.message);
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
     const requestUrl = originalRequest?.url ?? '';
     const isRefreshRequest = requestUrl.includes(API_CONFIG.ENDPOINTS.AUTH.REFRESH);

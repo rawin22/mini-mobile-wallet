@@ -10,6 +10,7 @@ import { storage } from '../../src/utils/storage';
 import type { FxCurrency, FxQuote } from '../../src/types/fx.types';
 import { colors, spacing, typography, radius } from '../../src/theme';
 import { useLanguage } from '../../src/hooks/useLanguage';
+import { useAuth } from '../../src/hooks/useAuth';
 import { CurrencyIcon, PinEntryModal } from '../../components/ui';
 
 type Step = 'form' | 'quoting' | 'quote' | 'booking' | 'success' | 'expired';
@@ -18,6 +19,7 @@ type Picker = 'buy' | 'sell' | 'amountCcy' | null;
 export default function ExchangeScreen() {
   const router = useRouter();
   const { t } = useLanguage();
+  const { user } = useAuth();
 
   const [step, setStep] = useState<Step>('form');
   const [error, setError] = useState('');
@@ -48,11 +50,16 @@ export default function ExchangeScreen() {
         const sells = sellRes.currencies ?? [];
         setBuyCurrencies(buys);
         setSellCurrencies(sells);
-        if (buys.length) setBuyCcy(buys[0].currencyCode);
-        if (sells.length) {
-          setSellCcy(sells[0].currencyCode);
-          setAmountCcy(sells[0].currencyCode);
-        }
+        // Default sell (From) to user's base currency
+        const baseCcy = user?.baseCurrencyCode || '';
+        const defaultSell = sells.find((c) => c.currencyCode === baseCcy)
+          ? baseCcy
+          : sells[0]?.currencyCode ?? '';
+        setSellCcy(defaultSell);
+        setAmountCcy(defaultSell);
+        // Default buy (To) to first currency that differs from sell
+        const defaultBuy = buys.find((c) => c.currencyCode !== defaultSell)?.currencyCode ?? buys[0]?.currencyCode ?? '';
+        setBuyCcy(defaultBuy);
       } catch {
         setError('Could not load currencies.');
       }
@@ -167,20 +174,20 @@ export default function ExchangeScreen() {
       {/* ── FORM ── */}
       {step === 'form' && (
         <View style={styles.card}>
-          <Text style={styles.label}>{t('fx.buyCurrency') || 'To Currency'}</Text>
-          <Pressable style={styles.picker} onPress={() => setActivePicker('buy')}>
-            <Text style={styles.pickerCode}>{buyCcy || 'Select'}</Text>
-            <Text style={styles.pickerName}>
-              {buyCurrencies.find((c) => c.currencyCode === buyCcy)?.currencyName ?? ''}
-            </Text>
-            <Text style={styles.chevron}>▾</Text>
-          </Pressable>
-
-          <Text style={styles.label}>{t('fx.sellCurrency') || 'From Currency'}</Text>
+          <Text style={styles.label}>{t('fx.sellCurrency') || 'From:'}</Text>
           <Pressable style={styles.picker} onPress={() => setActivePicker('sell')}>
             <Text style={styles.pickerCode}>{sellCcy || 'Select'}</Text>
             <Text style={styles.pickerName}>
               {sellCurrencies.find((c) => c.currencyCode === sellCcy)?.currencyName ?? ''}
+            </Text>
+            <Text style={styles.chevron}>▾</Text>
+          </Pressable>
+
+          <Text style={styles.label}>{t('fx.buyCurrency') || 'To:'}</Text>
+          <Pressable style={styles.picker} onPress={() => setActivePicker('buy')}>
+            <Text style={styles.pickerCode}>{buyCcy || 'Select'}</Text>
+            <Text style={styles.pickerName}>
+              {buyCurrencies.find((c) => c.currencyCode === buyCcy)?.currencyName ?? ''}
             </Text>
             <Text style={styles.chevron}>▾</Text>
           </Pressable>
@@ -196,7 +203,7 @@ export default function ExchangeScreen() {
             onChangeText={setAmount}
             placeholder="0.00"
             placeholderTextColor={colors.textMuted}
-            keyboardType="numeric"
+            keyboardType="decimal-pad"
           />
 
           <Text style={styles.label}>{t('fx.amountCurrency') || 'Amount Currency'}</Text>
@@ -300,8 +307,8 @@ export default function ExchangeScreen() {
         <Pressable style={styles.overlay} onPress={() => setActivePicker(null)}>
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>
-              {activePicker === 'buy' ? (t('fx.buyCurrency') || 'To Currency') :
-               activePicker === 'sell' ? (t('fx.sellCurrency') || 'From Currency') : (t('fx.amountCurrency') || 'Amount Currency')}
+              {activePicker === 'buy' ? (t('fx.buyCurrency') || 'To:') :
+               activePicker === 'sell' ? (t('fx.sellCurrency') || 'From:') : (t('fx.amountCurrency') || 'Amount Currency')}
             </Text>
             <FlatList
               data={pickerData}

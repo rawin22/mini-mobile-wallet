@@ -88,6 +88,7 @@ export default function DashboardScreen() {
 
   // Fetch recent recipients from payment history
   const fetchRecipients = useCallback(async () => {
+    if (!user) return;
     try {
       const cached = await storage.getRecentRecipients();
       if (cached.length > 0) setRecentRecipients(cached);
@@ -119,10 +120,11 @@ export default function DashboardScreen() {
     } catch (err) {
       console.log('[Dashboard] Could not load recent recipients:', err);
     }
-  }, [user?.userName]);
+  }, [user]);
 
   // Fetch FX currencies for converter
   const fetchFxCurrencies = useCallback(async () => {
+    if (!user) return;
     try {
       const [sellRes, buyRes] = await Promise.all([
         fxService.getSellCurrencies(),
@@ -145,13 +147,15 @@ export default function DashboardScreen() {
     } catch (err) {
       console.log('[Dashboard] Could not load FX currencies:', err);
     }
-  }, [user?.baseCurrencyCode]);
+  }, [user]);
 
   useEffect(() => {
+    if (!user?.organizationId) return;
     fetchBalances();
     fetchRecipients();
     fetchFxCurrencies();
-  }, [fetchBalances, fetchRecipients, fetchFxCurrencies]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.organizationId]);
 
   // Converter: get quote with debounce
   const getConverterQuote = useCallback(async () => {
@@ -364,7 +368,7 @@ export default function DashboardScreen() {
                   setConverterAmount(txt);
                   setConverterResult('');
                 }}
-                keyboardType="numeric"
+                keyboardType="decimal-pad"
                 placeholder="1.00"
                 placeholderTextColor={colors.textMuted}
                 returnKeyType="done"
