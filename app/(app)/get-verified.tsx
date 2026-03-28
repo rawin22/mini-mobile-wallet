@@ -7,6 +7,7 @@ import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import * as Clipboard from 'expo-clipboard';
 import { useAuth } from '../../src/hooks/useAuth';
+import { useLanguage } from '../../src/hooks/useLanguage';
 import {
   verificationService,
   buildIdDescription,
@@ -44,6 +45,7 @@ const emptyForm: VerificationFormData = {
 export default function GetVerifiedScreen() {
   const router = useRouter();
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   const [step, setStep] = useState<Step>('id-front');
   const [uploading, setUploading] = useState(false);
@@ -395,12 +397,10 @@ export default function GetVerifiedScreen() {
   if (step === 'id-front') {
     return (
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-        <Text style={styles.title}>Get Verified</Text>
-        <Text style={styles.stepLabel}>Step 1 of 3</Text>
-        <Text style={styles.stepTitle}>Upload ID Document</Text>
-        <Text style={styles.stepDesc}>
-          Take a clear photo of the front of your government-issued ID (passport, national ID, or driver's license).
-        </Text>
+        <Text style={styles.title}>{t('verification.title') || 'Get Verified'}</Text>
+        <Text style={styles.stepLabel}>{t('verification.step1Label') || 'Step 1 of 3'}</Text>
+        <Text style={styles.stepTitle}>{t('verification.step1Title') || 'Upload ID Document'}</Text>
+        <Text style={styles.stepDesc}>{t('verification.step1Hint') || 'Take a clear photo of the front of your government-issued ID.'}</Text>
 
         {!!error && <View style={styles.errorBox}><Text style={styles.errorText}>{error}</Text></View>}
 
@@ -409,10 +409,10 @@ export default function GetVerifiedScreen() {
         ) : (
           <View style={styles.card}>
             <Pressable style={styles.uploadBtn} onPress={() => handleUploadIdFront('camera')}>
-              <Text style={styles.uploadBtnText}>📷  Take Photo</Text>
+              <Text style={styles.uploadBtnText}>📷  {t('verification.takePhoto') || 'Take Photo'}</Text>
             </Pressable>
             <Pressable style={[styles.uploadBtn, styles.uploadBtnAlt]} onPress={() => handleUploadIdFront('library')}>
-              <Text style={styles.uploadBtnText}>🖼  Choose from Library</Text>
+              <Text style={styles.uploadBtnText}>🖼  {t('verification.chooseLibrary') || 'Choose from Library'}</Text>
             </Pressable>
           </View>
         )}
@@ -424,12 +424,10 @@ export default function GetVerifiedScreen() {
   if (step === 'selfie') {
     return (
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-        <Text style={styles.title}>Get Verified</Text>
-        <Text style={styles.stepLabel}>Step 2 of 3</Text>
-        <Text style={styles.stepTitle}>Take a Selfie</Text>
-        <Text style={styles.stepDesc}>
-          Take a clear selfie of your face. Make sure you are in good lighting and your face is fully visible.
-        </Text>
+        <Text style={styles.title}>{t('verification.title') || 'Get Verified'}</Text>
+        <Text style={styles.stepLabel}>{t('verification.step2Label') || 'Step 2 of 3'}</Text>
+        <Text style={styles.stepTitle}>{t('verification.step2Title') || 'Take a Selfie'}</Text>
+        <Text style={styles.stepDesc}>{t('verification.step2Hint') || 'Take a clear selfie. Make sure you are in good lighting.'}</Text>
 
         {!!error && <View style={styles.errorBox}><Text style={styles.errorText}>{error}</Text></View>}
 
@@ -438,13 +436,13 @@ export default function GetVerifiedScreen() {
         ) : (
           <View style={styles.card}>
             <Pressable style={styles.uploadBtn} onPress={() => handleUploadSelfie('camera')}>
-              <Text style={styles.uploadBtnText}>🤳  Take Selfie</Text>
+              <Text style={styles.uploadBtnText}>🤳  {t('verification.takeSelfie') || 'Take Selfie'}</Text>
             </Pressable>
             <Pressable style={[styles.uploadBtn, styles.uploadBtnAlt]} onPress={() => handleUploadSelfie('library')}>
-              <Text style={styles.uploadBtnText}>🖼  Choose from Library</Text>
+              <Text style={styles.uploadBtnText}>🖼  {t('verification.chooseLibrary') || 'Choose from Library'}</Text>
             </Pressable>
             <Pressable style={styles.backBtn} onPress={() => setStep('id-front')}>
-              <Text style={styles.backBtnText}>← Back</Text>
+              <Text style={styles.backBtnText}>← {t('common.back') || 'Back'}</Text>
             </Pressable>
           </View>
         )}
@@ -457,51 +455,49 @@ export default function GetVerifiedScreen() {
     return (
       <>
         <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-          <Text style={styles.title}>Get Verified</Text>
-          <Text style={styles.stepLabel}>Step 3 of 3</Text>
-          <Text style={styles.stepTitle}>Your Details</Text>
-          <Text style={styles.stepDesc}>
-            Please confirm your information. Fields marked * are required.
-          </Text>
+          <Text style={styles.title}>{t('verification.title') || 'Get Verified'}</Text>
+          <Text style={styles.stepLabel}>{t('verification.step3Label') || 'Step 3 of 3'}</Text>
+          <Text style={styles.stepTitle}>{t('verification.step3Title') || 'Your Details'}</Text>
+          <Text style={styles.stepDesc}>{t('verification.step3Hint') || 'Please confirm your information. Fields marked * are required.'}</Text>
 
           {!!error && <View style={styles.errorBox}><Text style={styles.errorText}>{error}</Text></View>}
 
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Personal Information</Text>
+            <Text style={styles.sectionTitle}>{t('verification.personalInfo') || 'Personal Information'}</Text>
 
-            <Text style={styles.label}>First Name *</Text>
+            <Text style={styles.label}>{t('verification.firstName') || 'First Name'} *</Text>
             <TextInput style={styles.input} value={form.firstName} onChangeText={set('firstName')}
-              placeholder="First name" placeholderTextColor={colors.textMuted} autoCapitalize="words" />
+              placeholder={t('verification.firstName') || 'First name'} placeholderTextColor={colors.textMuted} autoCapitalize="words" />
 
-            <Text style={styles.label}>Middle Name</Text>
+            <Text style={styles.label}>{t('verification.middleName') || 'Middle Name'}</Text>
             <TextInput style={styles.input} value={form.middleName} onChangeText={set('middleName')}
-              placeholder="Middle name (optional)" placeholderTextColor={colors.textMuted} autoCapitalize="words" />
+              placeholder={t('verification.middleName') || 'Middle name (optional)'} placeholderTextColor={colors.textMuted} autoCapitalize="words" />
 
-            <Text style={styles.label}>Last Name *</Text>
+            <Text style={styles.label}>{t('verification.lastName') || 'Last Name'} *</Text>
             <TextInput style={styles.input} value={form.lastName} onChangeText={set('lastName')}
-              placeholder="Last name" placeholderTextColor={colors.textMuted} autoCapitalize="words" />
+              placeholder={t('verification.lastName') || 'Last name'} placeholderTextColor={colors.textMuted} autoCapitalize="words" />
 
-            <Text style={styles.label}>Nationality</Text>
+            <Text style={styles.label}>{t('verification.nationality') || 'Nationality'}</Text>
             <TextInput style={styles.input} value={form.nationality} onChangeText={set('nationality')}
               placeholder="e.g. HK" placeholderTextColor={colors.textMuted} autoCapitalize="characters" />
 
-            <Text style={styles.label}>Date of Birth (YYYY-MM-DD)</Text>
+            <Text style={styles.label}>{t('verification.dateOfBirth') || 'Date of Birth (YYYY-MM-DD)'}</Text>
             <TextInput style={styles.input} value={form.dateOfBirth} onChangeText={set('dateOfBirth')}
               placeholder="1990-01-31" placeholderTextColor={colors.textMuted} keyboardType="numeric" />
 
-            <Text style={styles.label}>Place of Birth</Text>
+            <Text style={styles.label}>{t('verification.placeOfBirth') || 'Place of Birth'}</Text>
             <TextInput style={styles.input} value={form.placeOfBirth} onChangeText={set('placeOfBirth')}
-              placeholder="City of birth" placeholderTextColor={colors.textMuted} autoCapitalize="words" />
+              placeholder={t('verification.placeOfBirth') || 'City of birth'} placeholderTextColor={colors.textMuted} autoCapitalize="words" />
 
-            <Text style={styles.label}>Gender</Text>
+            <Text style={styles.label}>{t('verification.gender') || 'Gender'}</Text>
             <Pressable style={styles.pickerBtn} onPress={() => setShowGenderPicker(true)}>
               <Text style={styles.pickerValue}>{selectedGender?.label || 'Select gender'}</Text>
               <Text style={styles.chevron}>▾</Text>
             </Pressable>
 
-            <Text style={styles.sectionTitle}>ID Document</Text>
+            <Text style={styles.sectionTitle}>{t('verification.idDocument') || 'ID Document'}</Text>
 
-            <Text style={styles.label}>Country of Issuance *</Text>
+            <Text style={styles.label}>{t('verification.countryOfIssuance') || 'Country of Issuance'} *</Text>
             {loadingCountries ? (
               <ActivityIndicator color={colors.primary} style={styles.miniLoader} />
             ) : (
@@ -509,13 +505,13 @@ export default function GetVerifiedScreen() {
                 <Text style={styles.pickerValue}>
                   {selectedCountry
                     ? (selectedCountry.CountryName || selectedCountry.countryName)
-                    : 'Select country'}
+                    : (t('verification.selectCountry') || 'Select country')}
                 </Text>
                 <Text style={styles.chevron}>▾</Text>
               </Pressable>
             )}
 
-            <Text style={styles.label}>ID Type *</Text>
+            <Text style={styles.label}>{t('verification.idType') || 'ID Type'} *</Text>
             {loadingIdTypes ? (
               <ActivityIndicator color={colors.primary} style={styles.miniLoader} />
             ) : (
@@ -526,35 +522,35 @@ export default function GetVerifiedScreen() {
                 <Text style={styles.pickerValue}>
                   {selectedIdType
                     ? (selectedIdType.CountryIdentificationTypeEnglishName || selectedIdType.CountryIdentificationTypeName)
-                    : 'Select ID type'}
+                    : (t('verification.selectIdType') || 'Select ID type')}
                 </Text>
                 <Text style={styles.chevron}>▾</Text>
               </Pressable>
             )}
 
-            <Text style={styles.label}>ID Number *</Text>
+            <Text style={styles.label}>{t('verification.idNumber') || 'ID Number'} *</Text>
             <TextInput style={styles.input} value={form.idNumber} onChangeText={set('idNumber')}
-              placeholder="Document number" placeholderTextColor={colors.textMuted}
+              placeholder={t('verification.idNumber') || 'Document number'} placeholderTextColor={colors.textMuted}
               autoCapitalize="characters" autoCorrect={false} />
 
-            <Text style={styles.label}>Issuing Authority</Text>
+            <Text style={styles.label}>{t('verification.issuerName') || 'Issuing Authority'}</Text>
             <TextInput style={styles.input} value={form.issuerName} onChangeText={set('issuerName')}
               placeholder="e.g. Immigration Department" placeholderTextColor={colors.textMuted} autoCapitalize="words" />
 
-            <Text style={styles.label}>Issue Date (YYYY-MM-DD)</Text>
+            <Text style={styles.label}>{t('verification.issuanceDate') || 'Issue Date (YYYY-MM-DD)'}</Text>
             <TextInput style={styles.input} value={form.issuanceDate} onChangeText={set('issuanceDate')}
               placeholder="2020-01-01" placeholderTextColor={colors.textMuted} keyboardType="numeric" />
 
-            <Text style={styles.label}>Expiry Date (YYYY-MM-DD)</Text>
+            <Text style={styles.label}>{t('verification.expirationDate') || 'Expiry Date (YYYY-MM-DD)'}</Text>
             <TextInput style={styles.input} value={form.expirationDate} onChangeText={set('expirationDate')}
               placeholder="2030-01-01" placeholderTextColor={colors.textMuted} keyboardType="numeric" />
 
             <Pressable style={styles.submitBtn} onPress={handleSubmit}>
-              <Text style={styles.submitBtnText}>Submit Verification</Text>
+              <Text style={styles.submitBtnText}>{t('verification.submit') || 'Submit Verification'}</Text>
             </Pressable>
 
             <Pressable style={styles.backBtn} onPress={() => setStep('selfie')}>
-              <Text style={styles.backBtnText}>← Back</Text>
+              <Text style={styles.backBtnText}>← {t('common.back') || 'Back'}</Text>
             </Pressable>
           </View>
         </ScrollView>
@@ -563,7 +559,7 @@ export default function GetVerifiedScreen() {
         <Modal visible={showCountryPicker} transparent animationType="fade">
           <Pressable style={styles.overlay} onPress={() => setShowCountryPicker(false)}>
             <View style={styles.modal}>
-              <Text style={styles.modalTitle}>Country of Issuance</Text>
+              <Text style={styles.modalTitle}>{t('verification.countryOfIssuance') || 'Country of Issuance'}</Text>
               <FlatList
                 data={countries}
                 keyExtractor={(item) => item.CountryCode || item.countryCode || ''}
@@ -593,7 +589,7 @@ export default function GetVerifiedScreen() {
         <Modal visible={showIdTypePicker} transparent animationType="fade">
           <Pressable style={styles.overlay} onPress={() => setShowIdTypePicker(false)}>
             <View style={styles.modal}>
-              <Text style={styles.modalTitle}>ID Type</Text>
+              <Text style={styles.modalTitle}>{t('verification.idType') || 'ID Type'}</Text>
               <FlatList
                 data={idTypes}
                 keyExtractor={(item) => String(item.CountryIdentificationTypeID)}
@@ -619,7 +615,7 @@ export default function GetVerifiedScreen() {
         <Modal visible={showGenderPicker} transparent animationType="fade">
           <Pressable style={styles.overlay} onPress={() => setShowGenderPicker(false)}>
             <View style={styles.modal}>
-              <Text style={styles.modalTitle}>Gender</Text>
+              <Text style={styles.modalTitle}>{t('verification.gender') || 'Gender'}</Text>
               <FlatList
                 data={GENDER_OPTIONS}
                 keyExtractor={(item) => String(item.id)}
@@ -644,7 +640,7 @@ export default function GetVerifiedScreen() {
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.submittingText}>Submitting your verification...</Text>
+        <Text style={styles.submittingText}>{t('verification.submitting') || 'Submitting your verification...'}</Text>
       </View>
     );
   }
@@ -653,21 +649,19 @@ export default function GetVerifiedScreen() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.doneIcon}>✅</Text>
-      <Text style={styles.doneTitle}>Verification Submitted</Text>
-      <Text style={styles.doneDesc}>
-        Your documents have been submitted for review. Share your verification link with the verifier.
-      </Text>
+      <Text style={styles.doneTitle}>{t('verification.step4Title') || 'Verification Submitted'}</Text>
+      <Text style={styles.doneDesc}>{t('verification.step4Hint') || 'Your documents have been submitted for review. Share your verification link with the verifier.'}</Text>
 
       <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Your Verification Link</Text>
+        <Text style={styles.sectionTitle}>{t('verification.yourLink') || 'Your Verification Link'}</Text>
 
-        <Text style={styles.label}>Reference</Text>
+        <Text style={styles.label}>{t('verification.reference') || 'Reference'}</Text>
         <Pressable style={styles.copyRow} onPress={() => Clipboard.setStringAsync(vlinkReference)}>
           <Text style={styles.copyValue}>{vlinkReference}</Text>
           <Text style={styles.copyBtn}>Copy</Text>
         </Pressable>
 
-        <Text style={styles.label}>Verify URL</Text>
+        <Text style={styles.label}>{t('verification.verifyUrl') || 'Verify URL'}</Text>
         <Pressable style={styles.copyRow} onPress={() => Clipboard.setStringAsync(vlinkUrl)}>
           <Text style={styles.copyValue} numberOfLines={2}>{vlinkUrl}</Text>
           <Text style={styles.copyBtn}>Copy</Text>
@@ -675,10 +669,10 @@ export default function GetVerifiedScreen() {
       </View>
 
       <Pressable style={styles.submitBtn} onPress={() => router.replace('/(app)/profile' as any)}>
-        <Text style={styles.submitBtnText}>View in Profile</Text>
+        <Text style={styles.submitBtnText}>{t('verification.viewProfile') || 'View in Profile'}</Text>
       </Pressable>
       <Pressable style={styles.backBtn} onPress={() => router.replace('/(app)/dashboard' as any)}>
-        <Text style={styles.backBtnText}>Go to Dashboard</Text>
+        <Text style={styles.backBtnText}>{t('verification.goToDashboard') || 'Go to Dashboard'}</Text>
       </Pressable>
     </ScrollView>
   );

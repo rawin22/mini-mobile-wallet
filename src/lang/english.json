@@ -20,6 +20,7 @@
         "payments": "Payments",
         "exchanges": "Exchanges",
         "getVerified": "Get Verified",
+        "receive": "Receive",
         "profile": "Profile",
         "changePassword": "Change Password",
         "logout": "Log Out",
@@ -124,7 +125,19 @@
         "viewHistory": "View History",
         "instantReason": "Instant Payment",
         "to": "To",
-        "failed": "Failed to send payment. Please try again."
+        "failed": "Failed to send payment. Please try again.",
+        "searchRecipient": "Search Recipient",
+        "lookupPlaceholder": "Enter StealthID (e.g. VL10207)",
+        "search": "Search",
+        "scanQR": "Scan QR Code",
+        "cameraPermissionRequired": "Camera permission is required to scan QR codes.",
+        "recipientNotFound": "Recipient not found. Please check the ID and try again.",
+        "recipientVerified": "Verified",
+        "trustScore": "Trust Score",
+        "receive": "Receive",
+        "yourQRCode": "Your QR Code",
+        "shareLink": "Share Payment Link",
+        "stealthId": "Your StealthID"
     },
     "fx": {
         "title": "FX Exchange",
@@ -241,7 +254,18 @@
         "startNewVerification": "Submit New ID Document",
         "resetWarning": "Warning: This will delete your current ID documents and selfie. Your verification level (WKYC) will be reset to Level 0. You will need to upload new documents and re-submit for verification.",
         "confirmReset": "Yes, Reset and Start Over",
-        "resetting": "Resetting..."
+        "resetting": "Resetting...",
+        "personalInfo": "Personal Information",
+        "idDocument": "ID Document",
+        "takePhoto": "Take Photo",
+        "chooseLibrary": "Choose from Library",
+        "takeSelfie": "Take Selfie",
+        "submit": "Submit Verification",
+        "yourLink": "Your Verification Link",
+        "reference": "Reference",
+        "verifyUrl": "Verify URL",
+        "viewProfile": "View in Profile",
+        "goToDashboard": "Go to Dashboard"
     },
     "profile": {
         "title": "Profile",

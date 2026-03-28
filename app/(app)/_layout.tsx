@@ -39,6 +39,13 @@ export default function AppLayout() {
         }}
       />
       <Tabs.Screen
+        name="receive"
+        options={{
+          title: t('payment.receive') || 'Receive',
+          tabBarIcon: ({ color, size }) => <Ionicons name="qr-code-outline" size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           title: t('nav.profile') || 'Profile',

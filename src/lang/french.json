@@ -20,6 +20,7 @@
         "payments": "Paiements",
         "exchanges": "Changes",
         "getVerified": "Se faire vérifier",
+        "receive": "Recevoir",
         "profile": "Profil",
         "changePassword": "Changer le mot de passe",
         "logout": "Se déconnecter",
@@ -124,7 +125,19 @@
         "viewHistory": "Voir l'historique",
         "instantReason": "Paiement instantané",
         "to": "À",
-        "failed": "Échec de l'envoi du paiement. Veuillez réessayer."
+        "failed": "Échec de l'envoi du paiement. Veuillez réessayer.",
+        "searchRecipient": "Rechercher un destinataire",
+        "lookupPlaceholder": "Entrez le StealthID (ex. VL10207)",
+        "search": "Rechercher",
+        "scanQR": "Scanner un QR Code",
+        "cameraPermissionRequired": "L'autorisation de la caméra est requise pour scanner les QR codes.",
+        "recipientNotFound": "Destinataire introuvable. Vérifiez l'identifiant et réessayez.",
+        "recipientVerified": "Vérifié",
+        "trustScore": "Score de confiance",
+        "receive": "Recevoir",
+        "yourQRCode": "Votre QR Code",
+        "shareLink": "Partager le lien de paiement",
+        "stealthId": "Votre StealthID"
     },
     "fx": {
         "title": "Change FX",
@@ -241,7 +254,18 @@
         "startNewVerification": "Soumettre un nouveau document d'identité",
         "resetWarning": "Attention : Ceci supprimera vos documents d'identité et selfie actuels. Votre niveau de vérification (WKYC) sera réinitialisé au niveau 0. Vous devrez téléverser de nouveaux documents et soumettre à nouveau pour vérification.",
         "confirmReset": "Oui, réinitialiser et recommencer",
-        "resetting": "Réinitialisation..."
+        "resetting": "Réinitialisation...",
+        "personalInfo": "Informations personnelles",
+        "idDocument": "Pièce d'identité",
+        "takePhoto": "Prendre une photo",
+        "chooseLibrary": "Choisir dans la bibliothèque",
+        "takeSelfie": "Prendre un selfie",
+        "submit": "Soumettre la vérification",
+        "yourLink": "Votre lien de vérification",
+        "reference": "Référence",
+        "verifyUrl": "URL de vérification",
+        "viewProfile": "Voir dans le profil",
+        "goToDashboard": "Aller au tableau de bord"
     },
     "profile": {
         "title": "Profil",
