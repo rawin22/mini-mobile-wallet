@@ -1,6 +1,6 @@
 import {
   View, Text, TextInput, Pressable, StyleSheet,
-  ActivityIndicator, ScrollView, Modal, FlatList, Share,
+  ActivityIndicator, ScrollView, Modal, FlatList,
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';

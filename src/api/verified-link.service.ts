@@ -18,13 +18,13 @@ export interface VerifiedLinkProfile {
 interface SearchResponse {
   verifiedLinks?: VerifiedLinkProfile[];
   VerifiedLinks?: VerifiedLinkProfile[];
-  problems?: any;
+  problems?: unknown;
 }
 
 interface GetResponse {
   verifiedLink?: VerifiedLinkProfile;
   VerifiedLink?: VerifiedLinkProfile;
-  problems?: any;
+  problems?: unknown;
 }
 
 export const verifiedLinkService = {
