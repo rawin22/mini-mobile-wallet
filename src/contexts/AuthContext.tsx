@@ -4,7 +4,7 @@ import type { AuthContextType, UserSettings, TokenData } from '../types/auth.typ
 import { authService } from '../api/auth.service';
 import { API_CONFIG } from '../api/config';
 import { storage } from '../utils/storage';
-import { setUnauthorizedHandler } from '../api/client';
+import { setUnauthorizedHandler, setSilentLoginHandler } from '../api/client';
 import { AuthContext } from './authContextValue';
 
 interface AuthProviderProps {
@@ -31,7 +31,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     routerRef.current.replace('/(auth)/login' as any);
   }, []); // stable — no deps, uses ref internally
 
-  // Register logout as the 401 handler for the API client
+  // Register logout as the 401 handler for the API client (silentLogin registered below after its declaration)
   useEffect(() => {
     setUnauthorizedHandler(logout);
   }, [logout]);
@@ -89,6 +89,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return false;
     }
   }, []);
+
+  // Register silentLogin as the re-auth handler for 401 recovery (declared above)
+  useEffect(() => {
+    setSilentLoginHandler(silentLogin);
+  }, [silentLogin]);
 
   // Initialize from SecureStore / AsyncStorage on mount
   useEffect(() => {
@@ -173,6 +178,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     logout,
     refreshToken,
+    refreshUser: silentLogin,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

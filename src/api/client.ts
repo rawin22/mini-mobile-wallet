@@ -4,9 +4,14 @@ import { storage } from '../utils/storage';
 
 // Navigation callback injected by AuthContext — avoids window.location in RN
 let _onUnauthorized: (() => void) | null = null;
+let _onSilentLogin: (() => Promise<boolean>) | null = null;
 
 export const setUnauthorizedHandler = (handler: () => void): void => {
   _onUnauthorized = handler;
+};
+
+export const setSilentLoginHandler = (handler: () => Promise<boolean>): void => {
+  _onSilentLogin = handler;
 };
 
 const redirectToLogin = (): void => {
@@ -102,6 +107,17 @@ apiClient.interceptors.response.use(
         }
       } catch (refreshError) {
         processQueue(refreshError as AxiosError);
+        // Token refresh failed — try silent re-login with stored credentials before giving up
+        const relogged = _onSilentLogin ? await _onSilentLogin() : false;
+        if (relogged) {
+          // Re-login succeeded — retry the original request with the new token
+          const newToken = storage.getAccessToken();
+          if (originalRequest.headers && newToken) {
+            originalRequest.headers.Authorization = `Bearer ${newToken}`;
+          }
+          isRefreshing = false;
+          return apiClient(originalRequest);
+        }
         redirectToLogin();
         return Promise.reject(refreshError);
       } finally {

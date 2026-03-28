@@ -24,13 +24,15 @@ interface VLinkDisplay {
 }
 
 export default function ProfileScreen() {
-  const { user, logout } = useAuth();
+  const { user, logout, refreshUser } = useAuth();
   const { t, language, languages, setLanguage } = useLanguage();
   const router = useRouter();
   const [vlinks, setVlinks] = useState<VLinkDisplay[]>([]);
   const [vlinkLoading, setVlinkLoading] = useState(true);
   const [hasPin, setHasPin] = useState(false);
   const [showLangPicker, setShowLangPicker] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshMsg, setRefreshMsg] = useState('');
 
   useEffect(() => {
     setHasPin(storage.hasPin());
@@ -63,6 +65,15 @@ export default function ProfileScreen() {
     })();
   }, []);
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    setRefreshMsg('');
+    const ok = await refreshUser();
+    setRefreshMsg(ok ? '✓ Settings updated' : 'Could not refresh — check connection');
+    setRefreshing(false);
+    setTimeout(() => setRefreshMsg(''), 3000);
+  };
+
   if (!user) return null;
 
   const statusColor = (statusId: number) => {
@@ -85,6 +96,15 @@ export default function ProfileScreen() {
         </View>
         <Text style={styles.fullName}>{user.firstName} {user.lastName}</Text>
         <Text style={styles.username}>@{user.userName}</Text>
+
+        {/* Refresh settings */}
+        <Pressable style={styles.refreshBtn} onPress={handleRefresh} disabled={refreshing}>
+          {refreshing
+            ? <ActivityIndicator size="small" color="white" />
+            : <Ionicons name="refresh-outline" size={18} color="white" />}
+          <Text style={styles.refreshBtnText}>{refreshing ? 'Refreshing…' : 'Refresh Settings'}</Text>
+        </Pressable>
+        {!!refreshMsg && <Text style={styles.refreshMsg}>{refreshMsg}</Text>}
       </LinearGradient>
 
       {/* Account Info */}
@@ -104,19 +124,35 @@ export default function ProfileScreen() {
         <InfoRow label={t('profile.branch') || 'Branch'} value={user.branchName} />
       </View>
 
-      {/* Verification */}
-      {(user.customerWKYCLevel !== undefined || user.wkycId) && (
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>{t('profile.verification') || 'Verification'}</Text>
-          {user.customerWKYCLevel !== undefined && (
-            <InfoRow label={t('profile.wkycLevel') || 'WKYC Level'} value={String(user.customerWKYCLevel)} />
+      {/* Verification — always visible so user can see their KYC status */}
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>{t('profile.verification') || 'Verification'}</Text>
+        <View style={styles.statusRow}>
+          <Text style={styles.statusLabel}>KYC Status</Text>
+          {(user.customerWKYCLevel ?? 0) > 0 ? (
+            <View style={[styles.badge, { backgroundColor: `${colors.accent}22` }]}>
+              <Text style={[styles.badgeText, { color: colors.accent }]}>✓ Verified (Level {user.customerWKYCLevel})</Text>
+            </View>
+          ) : (
+            <View style={[styles.badge, { backgroundColor: `${colors.warning}22` }]}>
+              <Text style={[styles.badgeText, { color: colors.warning }]}>Not Verified</Text>
+            </View>
           )}
-          {user.customerTrustScore !== undefined && (
-            <InfoRow label={t('profile.trustScore') || 'Trust Score'} value={String(user.customerTrustScore)} />
-          )}
-          {!!user.wkycId && <InfoRow label={t('profile.wkycId') || 'WKYC ID'} value={user.wkycId} />}
         </View>
-      )}
+        {(user.customerTrustScore ?? 0) > 0 && (
+          <InfoRow label={t('profile.trustScore') || 'Trust Score'} value={String(user.customerTrustScore)} />
+        )}
+        {!!user.wkycId && <InfoRow label={t('profile.wkycId') || 'WKYC ID'} value={user.wkycId} />}
+        {(user.customerWKYCLevel ?? 0) === 0 && (
+          <Pressable
+            style={[styles.button, styles.verifyButton, { marginTop: spacing.sm }]}
+            onPress={() => router.push('/(app)/get-verified' as any)}
+          >
+            <Ionicons name="shield-checkmark-outline" size={16} color={colors.textPrimary} style={styles.btnIcon} />
+            <Text style={styles.buttonText}>{t('nav.getVerified') || 'Get Verified'}</Text>
+          </Pressable>
+        )}
+      </View>
 
       {/* Verified Links */}
       <View style={styles.card}>
@@ -289,6 +325,13 @@ const styles = StyleSheet.create({
   avatarText: { fontSize: 28, fontWeight: 'bold', color: colors.textPrimary },
   fullName: { fontSize: typography.heading, fontWeight: 'bold', color: colors.textPrimary },
   username: { fontSize: typography.small, color: colors.textSecondary },
+  refreshBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: spacing.xs,
+    marginTop: spacing.md, paddingVertical: spacing.xs + 2, paddingHorizontal: spacing.md,
+    borderRadius: radius.full, borderWidth: 1, borderColor: 'rgba(255,255,255,0.4)',
+  },
+  refreshBtnText: { color: 'white', fontSize: typography.caption, fontWeight: '600' },
+  refreshMsg: { fontSize: typography.caption, color: 'rgba(255,255,255,0.8)', marginTop: spacing.xs },
 
   card: {
     backgroundColor: colors.surface,

@@ -67,4 +67,6 @@ export interface AuthContextType {
   login: (username: string, password: string, rememberMe?: boolean) => Promise<void>;
   logout: () => void;
   refreshToken: () => Promise<boolean>;
+  /** Re-authenticates with stored credentials and refreshes user state. Returns true on success. */
+  refreshUser: () => Promise<boolean>;
 }
