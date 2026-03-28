@@ -37,11 +37,19 @@ export const verifiedLinkService = {
     return links[0] ?? null;
   },
 
-  /** Fetch the current user's own verified link (for QR display on the Receive screen). */
+  /** Fetch the current user's own verified link (for QR display on the Receive screen).
+   *  Returns null if the user has no verified link yet (API 404 is treated as "not found", not an error). */
   async getMyLink(customerId: string): Promise<VerifiedLinkProfile | null> {
-    const response = await apiClient.get<GetResponse>(API_CONFIG.ENDPOINTS.VERIFIED_LINK.BASE, {
-      params: { customerId, isPrimary: true },
-    });
-    return response.data.verifiedLink ?? response.data.VerifiedLink ?? null;
+    try {
+      const response = await apiClient.get<GetResponse>(API_CONFIG.ENDPOINTS.VERIFIED_LINK.BASE, {
+        params: { customerId, isPrimary: true },
+      });
+      return response.data.verifiedLink ?? response.data.VerifiedLink ?? null;
+    } catch (err: unknown) {
+      // 404 means the user simply has no verified link yet — not a hard error
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      if (status === 404 || status === 204) return null;
+      throw err;
+    }
   },
 };

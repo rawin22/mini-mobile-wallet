@@ -35,6 +35,8 @@ export interface UserSettings {
   lastLoginTime?: string;
   lastPasswordChangedTime?: string;
   wkycId?: string;
+  preferredAlias?: string;          // e.g. "RALF" — used as fallback PayID before VerifiedLink exists
+  defaultStealthId?: string;        // UUID returned by API
   isCurrencyCalculatorEnabled?: boolean;
   isBankInstantPaymentFeatureEnabled?: boolean;
   bankHomePageMessage?: string;

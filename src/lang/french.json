@@ -464,7 +464,7 @@
                     },
                     "language": {
                         "label": "Changer de langue",
-                        "description": "Allez dans Profil → Paramètres et appuyez sur la langue actuelle. Sélectionnez Anglais ou Français dans la liste. L'application entière change de langue immédiatement."
+                        "description": "Allez dans Profil → Paramètres et appuyez sur la langue actuelle. Sélectionnez Anglais, Français ou Portugais dans la liste. L'application entière change de langue immédiatement."
                     },
                     "getVerified": {
                         "label": "Vérification d'identité (KYC)",

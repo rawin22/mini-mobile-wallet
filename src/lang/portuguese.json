@@ -1,0 +1,528 @@
+{
+    "common": {
+        "loading": "A carregar...",
+        "back": "Voltar",
+        "cancel": "Cancelar",
+        "custom": "Personalizado",
+        "fetch": "Buscar",
+        "retry": "Tentar novamente",
+        "to": "para",
+        "language": "Idioma",
+        "light": "Claro",
+        "dark": "Escuro"
+    },
+    "nav": {
+        "dashboard": "Painel",
+        "payNow": "Pagar Agora",
+        "exchange": "Câmbio",
+        "help": "Ajuda",
+        "history": "Histórico",
+        "payments": "Pagamentos",
+        "exchanges": "Câmbios",
+        "getVerified": "Verificar Conta",
+        "receive": "Receber",
+        "profile": "Perfil",
+        "changePassword": "Alterar Senha",
+        "logout": "Sair",
+        "toggleSidebar": "Alternar barra lateral",
+        "toggleMobileMenu": "Alternar menu móvel",
+        "toggleTheme": "Alternar tema",
+        "userMenu": "Menu do utilizador"
+    },
+    "auth": {
+        "toggleTheme": "Alternar tema",
+        "subtitle": "Aceda à sua carteira",
+        "username": "Nome de utilizador",
+        "password": "Senha",
+        "confirmPassword": "Confirmar senha",
+        "email": "E-mail",
+        "cellphone": "Telemóvel",
+        "environment": "Ambiente",
+        "firstName": "Primeiro nome",
+        "lastName": "Apelido",
+        "referredBy": "Indicado por",
+        "notaryNode": "Nó notarial",
+        "enterUsername": "Introduza o seu nome de utilizador",
+        "enterPassword": "Introduza a sua senha",
+        "hidePassword": "Ocultar senha",
+        "showPassword": "Mostrar senha",
+        "signIn": "Entrar",
+        "signingIn": "A entrar...",
+        "newUser": "Novo utilizador?",
+        "createAccount": "Criar uma conta",
+        "alreadyAccount": "Já tem uma conta?",
+        "backToLogin": "Voltar ao início de sessão",
+        "signupTitle": "Registe-se connosco",
+        "signupSubtitle": "Crie a sua conta",
+        "submit": "Submeter",
+        "submitting": "A submeter...",
+        "loginFailed": "Falha no início de sessão. Verifique as suas credenciais.",
+        "passwordMismatch": "A senha e a confirmação de senha devem coincidir.",
+        "passwordPolicyFailed": "A senha não cumpre os requisitos de segurança.",
+        "referredByRequired": "O campo Indicado por é obrigatório.",
+        "signupConfigError": "Não foi possível carregar a configuração de registo. Tente novamente.",
+        "missingBankCredentials": "O registo não está configurado. Defina VITE_BANK_USERNAME e VITE_BANK_PASSWORD no ficheiro .env.",
+        "usernameExists": "O nome de utilizador já existe. Escolha um nome diferente.",
+        "signupSuccess": "Conta criada com sucesso.",
+        "signupFailed": "Falha no registo. Tente novamente.",
+        "rememberMe": "Lembrar-me",
+        "notary": {
+            "sx": "WinstantGold SX - Sint Maarten",
+            "us": "WinstantGold US - Estados Unidos",
+            "eu": "WinstantGold EU - Europa"
+        }
+    },
+    "dashboard": {
+        "welcome": "Bem-vindo, {{name}}",
+        "hideZero": "Ocultar saldos a zero",
+        "loadingBalances": "A carregar saldos...",
+        "loadError": "Falha ao carregar saldos. Tente novamente.",
+        "noBalances": "Não há saldos para mostrar.",
+        "available": "Disponível",
+        "reserved": "Reservado",
+        "total": "Total",
+        "viewStatement": "Ver extrato →",
+        "equivalent": "Equivalente em USD",
+        "favoritesOnly": "Apenas favoritos",
+        "quickPay": "Pagamento rápido",
+        "converter": "Conversor de moedas"
+    },
+    "statement": {
+        "title": "Extrato de conta",
+        "days": "{{days}} dias",
+        "all": "Todos",
+        "loading": "A carregar extrato...",
+        "loadError": "Falha ao carregar o extrato.",
+        "account": "Conta",
+        "opening": "Abertura",
+        "closing": "Fecho",
+        "noTransactions": "Nenhuma transação encontrada para este período.",
+        "date": "Data",
+        "type": "Tipo",
+        "description": "Descrição",
+        "debit": "Débito",
+        "credit": "Crédito",
+        "balance": "Saldo",
+        "totalDebits": "Total de débitos",
+        "totalCredits": "Total de créditos",
+        "netChange": "Variação líquida"
+    },
+    "payment": {
+        "title": "Pagamento Instantâneo",
+        "receiverPayId": "PayID do destinatário",
+        "receiverPlaceholder": "Introduza o PayID do destinatário",
+        "amount": "Montante",
+        "currency": "Moeda",
+        "memoOptional": "Nota (opcional)",
+        "memoPlaceholder": "Nota do pagamento",
+        "reviewPayment": "Rever pagamento",
+        "reviewSend": "Rever e enviar",
+        "sendPayment": "Enviar pagamento",
+        "processing": "A processar...",
+        "successTitle": "Pagamento enviado!",
+        "reference": "Referência",
+        "sendAnother": "Enviar outro",
+        "viewHistory": "Ver histórico",
+        "instantReason": "Pagamento instantâneo",
+        "to": "Para",
+        "failed": "Falha ao enviar o pagamento. Tente novamente.",
+        "searchRecipient": "Pesquisar destinatário",
+        "lookupPlaceholder": "Introduza o StealthID (ex.: VL10207)",
+        "search": "Pesquisar",
+        "scanQR": "Ler código QR",
+        "cameraPermissionRequired": "É necessária permissão de câmara para ler códigos QR.",
+        "recipientNotFound": "Destinatário não encontrado. Verifique o ID e tente novamente.",
+        "recipientVerified": "Verificado",
+        "trustScore": "Pontuação de confiança",
+        "receive": "Receber",
+        "yourQRCode": "O seu código QR",
+        "shareLink": "Partilhar link de pagamento",
+        "stealthId": "O seu StealthID"
+    },
+    "fx": {
+        "title": "Câmbio FX",
+        "buyCurrencies": "Moedas a comprar",
+        "sellCurrencies": "Moedas a vender",
+        "buyCurrency": "Para:",
+        "sellCurrency": "De:",
+        "amount": "Montante",
+        "amountCurrency": "Moeda do montante",
+        "getQuote": "Obter cotação",
+        "requestingQuote": "A solicitar cotação...",
+        "quoteTitle": "Cotação FX",
+        "expiresIn": "Expira em {{time}}",
+        "symbol": "Símbolo",
+        "rate": "Taxa",
+        "buy": "Comprar",
+        "sell": "Vender",
+        "dealType": "Tipo de operação",
+        "valueDate": "Data-valor",
+        "bookDeal": "Reservar operação",
+        "booking": "A reservar operação...",
+        "expiredTitle": "Cotação expirada",
+        "expiredBody": "A cotação expirou. Solicite uma nova.",
+        "newQuote": "Obter nova cotação",
+        "successTitle": "Operação reservada!",
+        "dealReference": "Referência da operação",
+        "depositReference": "Referência do depósito",
+        "bought": "Comprado",
+        "sold": "Vendido",
+        "newExchange": "Novo câmbio",
+        "viewHistory": "Ver histórico",
+        "loadCurrenciesError": "Falha ao carregar moedas.",
+        "quoteError": "Falha ao obter cotação. Tente novamente.",
+        "bookError": "Falha ao reservar operação. Tente novamente.",
+        "booked": "Reservado"
+    },
+    "history": {
+        "paymentsTitle": "Histórico de pagamentos",
+        "paymentsLoadError": "Falha ao carregar o histórico de pagamentos.",
+        "noPayments": "Nenhum pagamento encontrado.",
+        "exchangeTitle": "Histórico de câmbios",
+        "exchangeLoadError": "Falha ao carregar o histórico de câmbios.",
+        "noDeals": "Nenhuma operação FX encontrada.",
+        "date": "Data",
+        "reference": "Referência",
+        "from": "De",
+        "to": "Para",
+        "amount": "Montante",
+        "status": "Estado",
+        "sell": "Vender",
+        "buy": "Comprar",
+        "rate": "Taxa",
+        "booked": "Reservado",
+        "valueDate": "Data-valor"
+    },
+    "verification": {
+        "title": "Verificar conta",
+        "loading": "A carregar estado de verificação...",
+        "loadError": "Falha ao carregar dados de verificação. Tente novamente.",
+        "alreadyVerifiedTitle": "Está verificado",
+        "alreadyVerifiedMessage": "A sua identidade já foi verificada. Não é necessária mais nenhuma ação.",
+        "step1Label": "Documento de ID",
+        "step2Label": "Selfie",
+        "step3Label": "Revisão",
+        "step4Label": "Concluído",
+        "step1Title": "Carregar documento de identidade",
+        "step1Hint": "Selecione o país de emissão e o tipo de documento, depois carregue a frente (e o verso, se necessário) do seu documento de identificação.",
+        "step2Title": "Carregar selfie",
+        "step2Hint": "Tire ou carregue uma foto selfie nítida para verificação de identidade.",
+        "step3Title": "Rever e submeter",
+        "step3Hint": "Reveja as informações extraídas abaixo. Corrija eventuais erros antes de submeter o pedido de verificação.",
+        "step4Title": "Verificação submetida",
+        "step4Hint": "O seu pedido de verificação foi submetido com sucesso. Será notificado assim que for analisado.",
+        "countryOfIssuance": "País de emissão",
+        "selectCountry": "Selecione o país...",
+        "idType": "Tipo de documento",
+        "selectIdType": "Selecione o tipo de documento...",
+        "frontFile": "Frente do documento",
+        "backFile": "Verso do documento",
+        "selfieFile": "Foto selfie",
+        "idNumber": "Número do documento",
+        "issuerName": "Entidade emissora",
+        "firstName": "Primeiro nome",
+        "middleName": "Nome do meio",
+        "lastName": "Apelido",
+        "nationality": "Nacionalidade",
+        "dateOfBirth": "Data de nascimento",
+        "placeOfBirth": "Local de nascimento",
+        "gender": "Género",
+        "genderNA": "N/D",
+        "genderMale": "Masculino",
+        "genderFemale": "Feminino",
+        "issuanceDate": "Data de emissão",
+        "expirationDate": "Data de validade",
+        "uploading": "A carregar...",
+        "submitting": "A submeter...",
+        "uploadDocuments": "Carregar documentos",
+        "uploadSelfie": "Carregar selfie",
+        "submitVerification": "Submeter verificação",
+        "uploadIdError": "Falha ao carregar o documento de identidade. Tente novamente.",
+        "uploadSelfieError": "Falha ao carregar a selfie. Tente novamente.",
+        "submitError": "Falha ao submeter a verificação. Tente novamente.",
+        "invalidFileType": "Tipo de ficheiro inválido. Apenas imagens JPG e PNG são aceites.",
+        "openCamera": "Abrir câmara",
+        "capture": "Tirar foto",
+        "retake": "Tirar novamente",
+        "orUploadFile": "ou carregar um ficheiro",
+        "cameraError": "Não foi possível aceder à câmara. Verifique as permissões ou carregue um ficheiro.",
+        "referenceNumber": "Número de referência",
+        "verificationId": "ID de verificação",
+        "copy": "Copiar",
+        "submittedDetails": "Detalhes submetidos",
+        "startOver": "Recomeçar com novos documentos",
+        "startNewVerification": "Submeter novo documento de identidade",
+        "resetWarning": "Aviso: Isto irá eliminar os seus documentos de identidade e selfie atuais. O seu nível de verificação (WKYC) será reposto para o Nível 0. Terá de carregar novos documentos e re-submeter a verificação.",
+        "confirmReset": "Sim, repor e recomeçar",
+        "resetting": "A repor...",
+        "personalInfo": "Informações pessoais",
+        "idDocument": "Documento de identidade",
+        "takePhoto": "Tirar foto",
+        "chooseLibrary": "Escolher da galeria",
+        "takeSelfie": "Tirar selfie",
+        "submit": "Submeter verificação",
+        "yourLink": "O seu link de verificação",
+        "reference": "Referência",
+        "verifyUrl": "URL de verificação",
+        "viewProfile": "Ver no perfil",
+        "goToDashboard": "Ir para o painel"
+    },
+    "profile": {
+        "title": "Perfil",
+        "accountInfo": "Conta",
+        "personalInfo": "Pessoal",
+        "verification": "Verificação",
+        "settings": "Definições",
+        "status": "Estado",
+        "username": "Nome de utilizador",
+        "email": "E-mail",
+        "phone": "Telefone",
+        "firstName": "Primeiro nome",
+        "lastName": "Apelido",
+        "organization": "Organização",
+        "branch": "Agência",
+        "wkycLevel": "Nível WKYC",
+        "trustScore": "Pontuação de confiança",
+        "wkycId": "ID WKYC",
+        "baseCurrency": "Moeda base",
+        "language": "Idioma / Cultura",
+        "enabled": "Activo",
+        "lockedOut": "Bloqueado",
+        "lastLogin": "Último início de sessão",
+        "lastPasswordChange": "Última alteração de senha",
+        "yes": "Sim",
+        "no": "Não",
+        "changePassword": "Alterar senha",
+        "changePasswordTitle": "Alterar senha",
+        "currentPassword": "Senha actual",
+        "newPassword": "Nova senha",
+        "confirmNewPassword": "Confirmar nova senha",
+        "allFieldsRequired": "Todos os campos são obrigatórios.",
+        "changingPassword": "A alterar...",
+        "passwordChanged": "A sua senha foi alterada com sucesso.",
+        "changePasswordError": "Falha ao alterar a senha. Tente novamente.",
+        "backToProfile": "Voltar ao perfil",
+        "verifiedLinks": "Links verificados",
+        "noVlinks": "Nenhum link verificado encontrado.",
+        "vlinkReference": "Referência",
+        "vlinkName": "Nome",
+        "vlinkStatus": "Estado",
+        "vlinkUrl": "URL do VLink"
+    },
+    "help": {
+        "title": "Centro de ajuda",
+        "subtitle": "Guia rápido de todas as funcionalidades da aplicação.",
+        "searchPlaceholder": "Pesquisar tópicos de ajuda...",
+        "searchAria": "Pesquisar tópicos de ajuda",
+        "noResults": "Nenhum tópico de ajuda corresponde a \"{{query}}\".",
+        "sections": {
+            "gettingStarted": {
+                "title": "Primeiros passos",
+                "items": {
+                    "signIn": {
+                        "label": "Iniciar sessão",
+                        "description": "Introduza o seu nome de utilizador e senha no ecrã de início de sessão e toque em Entrar. Se for novo, toque em «Criar uma conta» para se registar primeiro."
+                    },
+                    "rememberMe": {
+                        "label": "Lembrar-me / Início de sessão automático",
+                        "description": "Active «Lembrar-me» no ecrã de início de sessão para continuar ligado. Da próxima vez que abrir a aplicação, irá iniciar sessão automaticamente sem pedir as suas credenciais."
+                    },
+                    "signUp": {
+                        "label": "Criar uma conta",
+                        "description": "Toque em «Criar uma conta» no ecrã de início de sessão. Preencha o nome, e-mail, telemóvel, nome de utilizador e senha, depois toque em «Criar conta». Será dirigido directamente para a verificação de identidade."
+                    },
+                    "openDashboard": {
+                        "label": "Visão geral do painel",
+                        "description": "Depois de iniciar sessão, chega ao Painel, que mostra todos os seus saldos em moedas, um widget de câmbio rápido e actividade recente."
+                    }
+                }
+            },
+            "dashboard": {
+                "title": "Painel",
+                "items": {
+                    "balanceCards": {
+                        "label": "Cartões de saldo",
+                        "description": "Cada cartão mostra uma conta numa moeda com o saldo disponível e reservado. Toque num cartão para abrir o extrato completo."
+                    },
+                    "hideZero": {
+                        "label": "Ocultar saldos a zero",
+                        "description": "Use o botão «Ocultar zero» para mostrar apenas as contas com saldo diferente de zero."
+                    },
+                    "favorites": {
+                        "label": "Favoritos",
+                        "description": "Toque na estrela de qualquer cartão de saldo para o marcar como favorito. Use o botão «Apenas favoritos» para mostrar apenas as suas contas marcadas."
+                    },
+                    "quickExchange": {
+                        "label": "Câmbio rápido",
+                        "description": "Use o widget de conversão de moedas no Painel para obter uma taxa indicativa instantaneamente sem ir ao ecrã de Câmbio."
+                    },
+                    "viewStatement": {
+                        "label": "Extrato de conta",
+                        "description": "Toque em qualquer cartão de saldo para abrir o seu extrato. Filtre as transações por período através do menu suspenso no topo."
+                    }
+                }
+            },
+            "payments": {
+                "title": "Enviar um pagamento",
+                "items": {
+                    "findRecipient": {
+                        "label": "Encontrar um destinatário",
+                        "description": "No ecrã Pagar, introduza o StealthID do destinatário (ex.: VL10207) e toque em Pesquisar. O nome, a organização e o estado verificado do destinatário são apresentados antes de continuar."
+                    },
+                    "scanQR": {
+                        "label": "Ler um código QR",
+                        "description": "Toque no ícone QR junto ao campo de pesquisa para abrir a câmara. Aponte para o código QR do destinatário — a aplicação preenche o ID automaticamente."
+                    },
+                    "fillForm": {
+                        "label": "Introduzir montante e moeda",
+                        "description": "Escolha a moeda entre os saldos disponíveis, introduza o montante e adicione uma nota opcional para o destinatário."
+                    },
+                    "reviewConfirm": {
+                        "label": "Rever e confirmar",
+                        "description": "Verifique todos os detalhes no ecrã de revisão. Se definiu um PIN, ser-lhe-á pedido antes do pagamento ser enviado."
+                    },
+                    "paymentHistory": {
+                        "label": "Histórico de pagamentos",
+                        "description": "Após o envio, o pagamento aparece no Histórico de pagamentos (Perfil → Histórico) com o número de referência e o estado."
+                    }
+                }
+            },
+            "receive": {
+                "title": "Receber um pagamento",
+                "items": {
+                    "yourQR": {
+                        "label": "O seu código QR",
+                        "description": "Abra o separador Receber (ícone QR na navegação inferior). O seu código QR pessoal é apresentado — outros podem lê-lo para lhe pagar sem introduzir o seu ID."
+                    },
+                    "shareLink": {
+                        "label": "Partilhar o seu link de pagamento",
+                        "description": "Toque em «Partilhar link de pagamento» para enviá-lo através de qualquer aplicação (WhatsApp, e-mail, SMS). O destinatário clica no link e é dirigido directamente para o formulário de pagamento."
+                    },
+                    "stealthId": {
+                        "label": "O seu StealthID",
+                        "description": "O seu StealthID (ex.: VL10207) é mostrado abaixo do código QR. Toque nele para o copiar para a área de transferência e partilhá-lo manualmente."
+                    }
+                }
+            },
+            "exchange": {
+                "title": "Câmbio (FX)",
+                "items": {
+                    "getQuote": {
+                        "label": "Obter uma cotação",
+                        "description": "No ecrã de Câmbio, selecione a moeda que quer vender (De) e a que quer comprar (Para), introduza o montante e toque em «Obter cotação»."
+                    },
+                    "quoteExpiry": {
+                        "label": "Validade da cotação",
+                        "description": "Uma cotação só é válida durante uma contagem decrescente. Se expirar, toque em «Nova cotação» para solicitar uma taxa actualizada."
+                    },
+                    "bookDeal": {
+                        "label": "Reservar a operação",
+                        "description": "Reveja os detalhes da cotação (taxa, montantes, comissão) e toque em «Reservar». Se tiver um PIN definido, introduza-o para confirmar. A operação reservada aparece no Histórico de câmbios."
+                    }
+                }
+            },
+            "history": {
+                "title": "Histórico e extratos",
+                "items": {
+                    "paymentHistory": {
+                        "label": "Histórico de pagamentos",
+                        "description": "Encontre todos os pagamentos enviados em Perfil → Histórico de pagamentos. Cada entrada mostra a data, referência, remetente, destinatário, montante e estado."
+                    },
+                    "exchangeHistory": {
+                        "label": "Histórico de câmbios",
+                        "description": "Encontre todas as operações FX reservadas em Perfil → Histórico de câmbios. Cada entrada mostra as moedas, taxa, montantes, comissão e data-valor."
+                    },
+                    "statement": {
+                        "label": "Extrato de conta",
+                        "description": "Toque em qualquer cartão de saldo no Painel para abrir um extrato detalhado. Use o filtro de período para filtrar as transações por intervalo de datas."
+                    }
+                }
+            },
+            "security": {
+                "title": "Segurança e PIN",
+                "items": {
+                    "setPin": {
+                        "label": "Definir um PIN",
+                        "description": "Vá ao Perfil e toque em «Definir PIN». Introduza um PIN de 6 dígitos e confirme-o. A partir daí, todos os pagamentos e operações FX exigirão o seu PIN antes de serem processados."
+                    },
+                    "changePin": {
+                        "label": "Alterar o seu PIN",
+                        "description": "Vá ao Perfil e toque em «Alterar PIN». Introduza o novo PIN de 6 dígitos e confirme-o."
+                    },
+                    "pinProtection": {
+                        "label": "O que está protegido por PIN?",
+                        "description": "Uma vez definido um PIN, é necessário para enviar um pagamento e reservar uma operação FX. Isto impede transações não autorizadas se o seu telemóvel estiver desbloqueado."
+                    }
+                }
+            },
+            "profile": {
+                "title": "Perfil e definições",
+                "items": {
+                    "changePassword": {
+                        "label": "Alterar senha",
+                        "description": "Vá a Perfil → Alterar senha. Introduza a sua senha actual e depois a nova senha duas vezes. Toque em «Alterar senha» para guardar."
+                    },
+                    "language": {
+                        "label": "Alterar idioma",
+                        "description": "Vá a Perfil → Definições e toque no idioma actual. Selecione Inglês, Francês ou Português na lista. A aplicação inteira muda de idioma imediatamente."
+                    },
+                    "getVerified": {
+                        "label": "Verificação de identidade (KYC)",
+                        "description": "Vá a Perfil → Verificar conta para concluir a verificação de identidade. Carregue o seu documento de identidade, tire uma selfie e confirme os seus dados. Um link de verificação é gerado para si."
+                    },
+                    "logout": {
+                        "label": "Terminar sessão",
+                        "description": "Toque em «Sair» no ecrã de Perfil. Se Lembrar-me estava activo, as suas credenciais são apagadas e terá de iniciar sessão novamente da próxima vez."
+                    }
+                }
+            },
+            "support": {
+                "title": "Resolução de problemas",
+                "items": {
+                    "cantSignIn": {
+                        "label": "Não consegue iniciar sessão",
+                        "description": "Verifique cuidadosamente o nome de utilizador e a senha — distinguem maiúsculas de minúsculas. Se o problema persistir, tente alterar o selector de ambiente no ecrã de início de sessão."
+                    },
+                    "paymentFailed": {
+                        "label": "Pagamento falhado",
+                        "description": "Certifique-se de que tem saldo disponível suficiente na moeda seleccionada. Verifique se o StealthID do destinatário está correcto e se a conta está activa."
+                    },
+                    "qrNotScanning": {
+                        "label": "Código QR não lido",
+                        "description": "Certifique-se de que a aplicação tem permissão para aceder à câmara (nas definições do telemóvel). Mantenha a câmara estável e certifique-se de que o código QR está totalmente enquadrado."
+                    },
+                    "pinForgotten": {
+                        "label": "PIN esquecido",
+                        "description": "Toque em «Esqueceu o PIN?» no ecrã de introdução de PIN. Ser-lhe-á pedido que verifique a sua identidade e poderá depois definir um novo PIN a partir do seu Perfil."
+                    }
+                }
+            }
+        }
+    },
+    "pin": {
+        "setPin": "Definir PIN",
+        "changePin": "Alterar PIN",
+        "enterPin": "Introduzir PIN",
+        "confirmPin": "Confirmar PIN",
+        "pinMismatch": "Os PINs não coincidem. Tente novamente.",
+        "pinSet": "O PIN foi definido com sucesso.",
+        "incorrectPin": "PIN incorrecto",
+        "tooManyAttempts": "Demasiadas tentativas. Aguarde.",
+        "forgotPin": "Esqueceu o PIN?"
+    },
+    "onboarding": {
+        "skip": "Saltar",
+        "next": "Seguinte",
+        "getStarted": "Começar",
+        "welcome": "Bem-vindo ao WinstantPay",
+        "welcomeDesc": "A sua carteira móvel para pagamentos globais e câmbio de moedas.",
+        "dashboardTitle": "Os seus saldos",
+        "dashboardDesc": "Consulte todas as suas contas em moedas de relance. Toque em qualquer conta para ver o seu extrato.",
+        "payTitle": "Enviar pagamentos",
+        "payDesc": "Envie pagamentos instantâneos a qualquer pessoa com um PayID. Rápido, seguro e fácil.",
+        "exchangeTitle": "Trocar moedas",
+        "exchangeDesc": "Converta entre moedas às taxas de mercado em tempo real. Obtenha cotações e reserve operações instantaneamente.",
+        "securityTitle": "Transações seguras",
+        "securityDesc": "Proteja os seus pagamentos e câmbios com um código PIN de 6 dígitos."
+    }
+}

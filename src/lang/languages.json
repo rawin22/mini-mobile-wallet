@@ -10,5 +10,11 @@
         "label": "French",
         "nativeLabel": "Français",
         "flag": "🇫🇷"
+    },
+    {
+        "code": "pt",
+        "label": "Portuguese",
+        "nativeLabel": "Português (Angola)",
+        "flag": "🇦🇴"
     }
 ]

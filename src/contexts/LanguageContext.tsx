@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import english from '../lang/english.json';
 import french from '../lang/french.json';
+import portuguese from '../lang/portuguese.json';
 import languageList from '../lang/languages.json';
 import { LanguageContext } from './languageContextValue';
 import { storage } from '../utils/storage';
@@ -19,6 +20,7 @@ const DEFAULT_LANGUAGE = 'en';
 const dictionaries: Record<string, TranslationMap> = {
   en: english as TranslationMap,
   fr: french as TranslationMap,
+  pt: portuguese as TranslationMap,
 };
 
 const getNestedValue = (

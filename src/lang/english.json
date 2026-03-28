@@ -464,7 +464,7 @@
                     },
                     "language": {
                         "label": "Change language",
-                        "description": "Go to Profile → Settings and tap the current language. Select English or French from the list. The entire app switches language immediately."
+                        "description": "Go to Profile → Settings and tap the current language. Select English, French, or Portuguese from the list. The entire app switches language immediately."
                     },
                     "getVerified": {
                         "label": "Identity verification (KYC)",

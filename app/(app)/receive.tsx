@@ -20,7 +20,10 @@ export default function ReceiveScreen() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    if (!user?.organizationId) return;
+    if (!user?.organizationId) {
+      setLoading(false);
+      return;
+    }
     verifiedLinkService.getMyLink(user.organizationId)
       .then(setLink)
       .catch(() => setError('Could not load your payment link.'))
@@ -28,7 +31,7 @@ export default function ReceiveScreen() {
   }, [user]);
 
   const paymentUrl = link?.VerifiedLinkUrl || link?.VerifiedLinkShortUrl || '';
-  const stealthId = link?.VerifiedLinkReference || user?.organizationId || '';
+  const stealthId = link?.VerifiedLinkReference || user?.preferredAlias || '';
   const qrValue = paymentUrl || stealthId;
 
   const handleShare = async () => {
