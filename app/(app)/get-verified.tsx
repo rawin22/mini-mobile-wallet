@@ -2,6 +2,7 @@ import {
   View, Text, TextInput, Pressable, StyleSheet,
   ActivityIndicator, ScrollView, Modal, FlatList, Alert,
 } from 'react-native';
+import DocumentCamera from '../../src/components/DocumentCamera';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
@@ -48,6 +49,7 @@ export default function GetVerifiedScreen() {
   const { t } = useLanguage();
 
   const [step, setStep] = useState<Step>('id-front');
+  const [showDocCamera, setShowDocCamera] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
 
@@ -123,7 +125,10 @@ export default function GetVerifiedScreen() {
       mediaTypes: ['images'],
       quality: 0.85,
       base64: true,
-      allowsEditing: false,
+      // For documents (not selfie): enable crop overlay locked to landscape 3:2
+      // This covers passport data pages (~1.42:1) and standard ID-1 cards (~1.58:1)
+      allowsEditing: !frontCamera,
+      aspect: frontCamera ? undefined : ([3, 2] as [number, number]),
       ...(source === 'camera' ? { cameraType: frontCamera ? ImagePicker.CameraType.front : ImagePicker.CameraType.back } : {}),
     };
 
@@ -143,14 +148,10 @@ export default function GetVerifiedScreen() {
     return 'Upload failed. Please try again.';
   };
 
-  const handleUploadIdFront = async (source: 'camera' | 'library') => {
-    setError('');
+  // Shared upload logic for ID front — called from both camera and library paths
+  const uploadIdFrontBase64 = async (base64: string) => {
     const customerId = resolvedCustomerId;
     if (!customerId) { setError('User customer ID not found. Please log in again.'); return; }
-
-    const base64 = await pickImage(source, false);
-    if (!base64) return;
-
     setUploading(true);
     console.log('[KYC] Uploading ID front, customerId:', customerId);
     try {
@@ -178,7 +179,6 @@ export default function GetVerifiedScreen() {
       console.log('[KYC] ID front uploaded:', result.FileAttachmentId);
       setFrontFileId(result.FileAttachmentId);
 
-      // Pre-fill form from OCR
       if (result.Properties) {
         const ocr = mapOcrToFormData(result.Properties);
         setForm((prev) => ({
@@ -201,6 +201,23 @@ export default function GetVerifiedScreen() {
     } finally {
       setUploading(false);
     }
+  };
+
+  const handleUploadIdFront = async (source: 'camera' | 'library') => {
+    setError('');
+    if (source === 'camera') {
+      // Open the live document camera overlay instead of the system camera
+      setShowDocCamera(true);
+      return;
+    }
+    const base64 = await pickImage('library', false);
+    if (!base64) return;
+    await uploadIdFrontBase64(base64);
+  };
+
+  const handleDocCameraCapture = async (base64: string) => {
+    setShowDocCamera(false);
+    await uploadIdFrontBase64(base64);
   };
 
   const handleUploadSelfie = async (source: 'camera' | 'library') => {
@@ -396,27 +413,37 @@ export default function GetVerifiedScreen() {
   // ─── Step: ID Front ───────────────────────────────────────────────────────
   if (step === 'id-front') {
     return (
-      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-        <Text style={styles.title}>{t('verification.title') || 'Get Verified'}</Text>
-        <Text style={styles.stepLabel}>{t('verification.step1Label') || 'Step 1 of 3'}</Text>
-        <Text style={styles.stepTitle}>{t('verification.step1Title') || 'Upload ID Document'}</Text>
-        <Text style={styles.stepDesc}>{t('verification.step1Hint') || 'Take a clear photo of the front of your government-issued ID.'}</Text>
+      <View style={{ flex: 1 }}>
+        {/* Full-screen live document camera overlay */}
+        <Modal visible={showDocCamera} animationType="slide" statusBarTranslucent>
+          <DocumentCamera
+            onCapture={handleDocCameraCapture}
+            onClose={() => setShowDocCamera(false)}
+          />
+        </Modal>
 
-        {!!error && <View style={styles.errorBox}><Text style={styles.errorText}>{error}</Text></View>}
+        <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+          <Text style={styles.title}>{t('verification.title') || 'Get Verified'}</Text>
+          <Text style={styles.stepLabel}>{t('verification.step1Label') || 'Step 1 of 3'}</Text>
+          <Text style={styles.stepTitle}>{t('verification.step1Title') || 'Upload ID Document'}</Text>
+          <Text style={styles.stepDesc}>{t('verification.step1Hint') || 'Take a clear photo of the front of your government-issued ID.'}</Text>
 
-        {uploading ? (
-          <ActivityIndicator size="large" color={colors.primary} style={styles.loader} />
-        ) : (
-          <View style={styles.card}>
-            <Pressable style={styles.uploadBtn} onPress={() => handleUploadIdFront('camera')}>
-              <Text style={styles.uploadBtnText}>📷  {t('verification.takePhoto') || 'Take Photo'}</Text>
-            </Pressable>
-            <Pressable style={[styles.uploadBtn, styles.uploadBtnAlt]} onPress={() => handleUploadIdFront('library')}>
-              <Text style={styles.uploadBtnText}>🖼  {t('verification.chooseLibrary') || 'Choose from Library'}</Text>
-            </Pressable>
-          </View>
-        )}
-      </ScrollView>
+          {!!error && <View style={styles.errorBox}><Text style={styles.errorText}>{error}</Text></View>}
+
+          {uploading ? (
+            <ActivityIndicator size="large" color={colors.primary} style={styles.loader} />
+          ) : (
+            <View style={styles.card}>
+              <Pressable style={styles.uploadBtn} onPress={() => handleUploadIdFront('camera')}>
+                <Text style={styles.uploadBtnText}>📷  {t('verification.takePhoto') || 'Take Photo'}</Text>
+              </Pressable>
+              <Pressable style={[styles.uploadBtn, styles.uploadBtnAlt]} onPress={() => handleUploadIdFront('library')}>
+                <Text style={styles.uploadBtnText}>🖼  {t('verification.chooseLibrary') || 'Choose from Library'}</Text>
+              </Pressable>
+            </View>
+          )}
+        </ScrollView>
+      </View>
     );
   }
 
