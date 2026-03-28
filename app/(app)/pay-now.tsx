@@ -89,9 +89,22 @@ export default function PayNowScreen() {
 
   // ─── Lookup ───────────────────────────────────────────────────────────────
 
+  const isVlinkRef = (value: string) =>
+    /^VL\d+$/i.test(value) || value.includes('/vl/') || value.includes('/verify/');
+
   const handleLookup = async (id?: string) => {
     const query = (id ?? lookupId).trim();
     if (!query) return;
+
+    // Plain alias (e.g. "RALF") — no search needed, use directly as toAlias
+    if (!isVlinkRef(query)) {
+      setToAlias(query);
+      setRecipientProfile(null);
+      setStep('form');
+      return;
+    }
+
+    // VLink reference or URL — verify it exists and is active, then use reference as PayID
     setLookupLoading(true);
     setError('');
     try {
@@ -100,14 +113,13 @@ export default function PayNowScreen() {
         setError(t('payment.recipientNotFound') || 'Recipient not found.');
         return;
       }
-      setRecipientProfile(profile);
-      // Resolve recipient's alias via their customerId — that's what toCustomer must be
-      if (profile.customerId) {
-        const recipientAlias = await aliasService.getDefaultAlias(profile.customerId);
-        setToAlias(recipientAlias ?? profile.verifiedLinkReference);
-      } else {
-        setToAlias(profile.verifiedLinkReference);
+      if (profile.verifiedLinkStatusTypeName && profile.verifiedLinkStatusTypeName !== 'Active') {
+        setError(`VLink is ${profile.verifiedLinkStatusTypeName} — cannot pay to an inactive link.`);
+        return;
       }
+      setRecipientProfile(profile);
+      // VLink reference IS the PayID — use it directly as toCustomer
+      setToAlias(profile.verifiedLinkReference);
     } catch {
       setError(t('payment.recipientNotFound') || 'Recipient not found. Please check the ID.');
     } finally {
@@ -227,7 +239,7 @@ export default function PayNowScreen() {
               style={styles.searchInput}
               value={lookupId}
               onChangeText={(v) => { setLookupId(v); setRecipientProfile(null); }}
-              placeholder={t('payment.lookupPlaceholder') || 'Enter StealthID (e.g. VL10207)'}
+              placeholder={t('payment.lookupPlaceholder') || 'Enter PayID or VLink (e.g. RALF or VL10207)'}
               placeholderTextColor={colors.textMuted}
               autoCapitalize="characters"
               autoCorrect={false}
@@ -271,7 +283,7 @@ export default function PayNowScreen() {
               disabled={!lookupId.trim()}
               onPress={() => handleLookup()}
             >
-              <Text style={styles.buttonText}>{t('payment.search') || 'Search'}</Text>
+              <Text style={styles.buttonText}>{t('payment.next') || 'Next'}</Text>
             </Pressable>
           )}
         </View>
