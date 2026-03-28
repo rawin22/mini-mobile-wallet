@@ -158,6 +158,7 @@ export const API_CONFIG = {
       STATEMENT: '/api/v1/CustomerAccountStatement',
       FROM_TEMPLATE: '/api/v1/Customer/FromTemplate',
       USER: '/api/v1/CustomerUser',
+      ALIAS_LIST: '/api/v1/CustomerAccountAliasList',
     },
     COUNTRY: { LIST: '/api/v1/CountryList', ID_TYPES: '/api/v1/CountryIdentificationTypeList' },
     FILE_ATTACHMENT: { BASE: '/api/v1/FileAttachment', INFO_LIST: '/api/v1/FileAttachmentInfoList' },

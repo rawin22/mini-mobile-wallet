@@ -91,13 +91,10 @@ export default function DashboardScreen() {
     }
   }, [user?.organizationId, t]);
 
-  // Fetch recent recipients from payment history
+  // Fetch recent recipients from payment history — always live, never cached
   const fetchRecipients = useCallback(async () => {
     if (!user) return;
     try {
-      const cached = await storage.getRecentRecipients();
-      if (cached.length > 0) setRecentRecipients(cached);
-
       const response = await paymentHistoryService.searchPayments();
       console.log('[Dashboard] Payment search response:', JSON.stringify(response).slice(0, 500));
       const payments = response.records?.payments ?? [];
@@ -118,10 +115,7 @@ export default function DashboardScreen() {
         }
       }
       console.log('[Dashboard] Extracted', recipients.length, 'unique recipients');
-      if (recipients.length > 0) {
-        setRecentRecipients(recipients);
-        await storage.saveRecentRecipients(recipients);
-      }
+      setRecentRecipients(recipients);
     } catch (err) {
       console.log('[Dashboard] Could not load recent recipients:', err);
     }

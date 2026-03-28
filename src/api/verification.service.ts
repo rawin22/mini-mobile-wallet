@@ -132,6 +132,29 @@ export const appendVerificationMetadata = (
     return `${baseDescription}, ${metaParts.join(', ')}`;
 };
 
+/** Build the VLink Message field — uses the canonical key names expected by the back-office. */
+export const buildVlinkMessage = (
+    data: VerificationFormData,
+    userId: string,
+    userName: string,
+    fullName: string,
+): string => {
+    const parts = [
+        `id_country_of_issuance: ${data.countryOfIssuance}`,
+        `id_type: ${data.idType}`,
+        `id_number: ${data.idNumber}`,
+        `id_issuance_date: ${data.issuanceDate}`,
+        `id_issuer_authority: ${data.issuerName}`,
+        `id_expiration_date: ${data.expirationDate}`,
+        `is_get_verified_requested: True`,
+        `get_verified_requested_by_user_id: ${userId}`,
+        `get_verified_requested_by_user_name: ${userName}`,
+        `get_verified_requested_by_name: ${fullName}`,
+        `get_verified_requested_date: ${new Date().toISOString().split('T')[0]}`,
+    ];
+    return parts.join(', ');
+};
+
 export const parseDescriptionProperties = (description: string): Record<string, string> => {
     const result: Record<string, string> = {};
     if (!description) return result;
@@ -521,7 +544,7 @@ export const verificationService = {
         const d = response.data as Record<string, unknown>;
         const records = (d.Records ?? d.records) as Record<string, unknown> | undefined;
         const vlinks = (records?.VerifiedLinks ?? records?.verifiedLinks) as VerifiedLinkSearchRecord[] | undefined;
-        return vlinks ?? [];
+        return (vlinks ?? []).filter((vl) => !(vl.isDeleted ?? vl.IsDeleted));
     },
 
     async getVerifiedLink(verifiedLinkId: string): Promise<Record<string, unknown> | null> {

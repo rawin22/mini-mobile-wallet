@@ -100,6 +100,7 @@ export const storage = {
     await SecureStore.deleteItemAsync(STORAGE_KEYS.REFRESH_TOKEN);
     await SecureStore.deleteItemAsync(STORAGE_KEYS.EXPIRES_AT);
     await AsyncStorage.removeItem(STORAGE_KEYS.USER_DATA);
+    await AsyncStorage.removeItem(STORAGE_KEYS.RECENT_RECIPIENTS);
   },
 
   async saveCredentials(username: string, password: string): Promise<void> {

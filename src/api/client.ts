@@ -50,9 +50,17 @@ const processQueue = (error: AxiosError | null = null) => {
 };
 
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Log problems in successful (2xx) responses — API returns errors inside the body
+    const problems = (response.data as Record<string, unknown>)?.problems;
+    if (problems) {
+      console.warn(`[API] PROBLEMS ${response.config?.method?.toUpperCase()} ${response.config?.url}`, JSON.stringify(problems));
+    }
+    return response;
+  },
   async (error: AxiosError) => {
-    console.warn(`[API] ERROR ${error.response?.status ?? 'NETWORK'} ${error.config?.baseURL ?? ''}${error.config?.url ?? ''}`, error.message);
+    const body = error.response?.data ? JSON.stringify(error.response.data) : '';
+    console.warn(`[API] ERROR ${error.response?.status ?? 'NETWORK'} ${error.config?.baseURL ?? ''}${error.config?.url ?? ''} — ${error.message} ${body}`);
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
     const requestUrl = originalRequest?.url ?? '';
     const isRefreshRequest = requestUrl.includes(API_CONFIG.ENDPOINTS.AUTH.REFRESH);

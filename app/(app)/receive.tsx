@@ -1,5 +1,5 @@
 import {
-  View, Text, Pressable, StyleSheet, ActivityIndicator, Share,
+  View, Text, Pressable, StyleSheet, ActivityIndicator, Share, ScrollView,
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import QRCode from 'react-native-qrcode-svg';
@@ -7,14 +7,15 @@ import * as Clipboard from 'expo-clipboard';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../src/hooks/useAuth';
 import { useLanguage } from '../../src/hooks/useLanguage';
-import { verifiedLinkService, type VerifiedLinkProfile } from '../../src/api/verified-link.service';
+import { verifiedLinkService, buildVlinkUrl, type VerifiedLinkProfile } from '../../src/api/verified-link.service';
 import { colors, spacing, typography, radius, shadows } from '../../src/theme';
 
 export default function ReceiveScreen() {
   const { user } = useAuth();
   const { t } = useLanguage();
 
-  const [link, setLink] = useState<VerifiedLinkProfile | null>(null);
+  const [links, setLinks] = useState<VerifiedLinkProfile[]>([]);
+  const [selected, setSelected] = useState<VerifiedLinkProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
@@ -24,14 +25,17 @@ export default function ReceiveScreen() {
       setLoading(false);
       return;
     }
-    verifiedLinkService.getMyLink(user.organizationId)
-      .then(setLink)
+    verifiedLinkService.getMyLinks(user.organizationId)
+      .then((list) => {
+        setLinks(list);
+        setSelected(list[0] ?? null);
+      })
       .catch(() => setError('Could not load your payment link.'))
       .finally(() => setLoading(false));
   }, [user]);
 
-  const paymentUrl = link?.VerifiedLinkUrl || link?.VerifiedLinkShortUrl || '';
-  const stealthId = link?.VerifiedLinkReference || user?.preferredAlias || '';
+  const stealthId = selected?.verifiedLinkReference || user?.preferredAlias || '';
+  const paymentUrl = selected?.verifiedLinkUrl || (selected?.verifiedLinkId ? buildVlinkUrl(selected.verifiedLinkId) : '');
   const qrValue = paymentUrl || stealthId;
 
   const handleShare = async () => {
@@ -51,7 +55,11 @@ export default function ReceiveScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.scroll}
+      contentContainerStyle={styles.container}
+      keyboardShouldPersistTaps="handled"
+    >
       <Text style={styles.title}>{t('payment.receive') || 'Get Paid'}</Text>
       <Text style={styles.subtitle}>{t('payment.yourQRCode') || 'Share your QR code or payment link'}</Text>
 
@@ -65,6 +73,32 @@ export default function ReceiveScreen() {
 
       {!loading && !error && (
         <>
+          {/* VLink picker — only shown when the user has more than one */}
+          {links.length > 1 && (
+            <View style={styles.pickerCard}>
+              <Text style={styles.pickerLabel}>Select payment link</Text>
+              {links.map((vl) => (
+                <Pressable
+                  key={vl.verifiedLinkId}
+                  style={[styles.pickerItem, selected?.verifiedLinkId === vl.verifiedLinkId && styles.pickerItemActive]}
+                  onPress={() => { setSelected(vl); setCopied(false); }}
+                >
+                  <View style={styles.pickerItemInner}>
+                    <Text style={[styles.pickerRef, selected?.verifiedLinkId === vl.verifiedLinkId && styles.pickerRefActive]}>
+                      {vl.verifiedLinkReference}
+                    </Text>
+                    {!!vl.verifiedLinkName && (
+                      <Text style={styles.pickerName} numberOfLines={1}>{vl.verifiedLinkName}</Text>
+                    )}
+                  </View>
+                  {selected?.verifiedLinkId === vl.verifiedLinkId && (
+                    <Ionicons name="checkmark-circle" size={20} color={colors.primary} />
+                  )}
+                </Pressable>
+              ))}
+            </View>
+          )}
+
           {/* QR Code */}
           <View style={styles.qrCard}>
             {qrValue ? (
@@ -81,7 +115,7 @@ export default function ReceiveScreen() {
             )}
           </View>
 
-          {/* StealthID display */}
+          {/* StealthID / alias display */}
           {stealthId ? (
             <View style={styles.idCard}>
               <Text style={styles.idLabel}>{t('payment.stealthId') || 'Your StealthID'}</Text>
@@ -98,7 +132,7 @@ export default function ReceiveScreen() {
 
           {/* Share button */}
           <Pressable
-            style={({ pressed }) => [styles.shareButton, pressed && styles.shareButtonPressed, ...([shadows.button])]}
+            style={({ pressed }) => [styles.shareButton, pressed && styles.shareButtonPressed, ...[shadows.button]]}
             onPress={handleShare}
             disabled={!qrValue}
           >
@@ -107,18 +141,39 @@ export default function ReceiveScreen() {
           </Pressable>
         </>
       )}
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, padding: spacing.lg, alignItems: 'center' },
+  scroll: { flex: 1, backgroundColor: colors.background },
+  container: { padding: spacing.lg, alignItems: 'center', flexGrow: 1 },
   title: { fontSize: typography.heading, fontWeight: 'bold', color: colors.textPrimary, marginTop: spacing.md },
   subtitle: { fontSize: typography.small, color: colors.textSecondary, marginBottom: spacing.xl, textAlign: 'center' },
   loader: { marginTop: spacing.xxl },
 
   errorBox: { backgroundColor: `${colors.danger}22`, borderWidth: 1, borderColor: colors.danger, borderRadius: radius.md, padding: spacing.md, width: '100%' },
   errorText: { color: colors.danger, fontSize: typography.small },
+
+  pickerCard: {
+    width: '100%', backgroundColor: colors.surface,
+    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
+    marginBottom: spacing.lg, overflow: 'hidden',
+  },
+  pickerLabel: {
+    fontSize: typography.caption, fontWeight: '700', color: colors.textMuted,
+    textTransform: 'uppercase', letterSpacing: 1,
+    padding: spacing.md, borderBottomWidth: 1, borderBottomColor: colors.border,
+  },
+  pickerItem: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    padding: spacing.md, borderBottomWidth: 1, borderBottomColor: colors.border,
+  },
+  pickerItemActive: { backgroundColor: `${colors.primary}11` },
+  pickerItemInner: { flex: 1 },
+  pickerRef: { fontSize: typography.body, fontWeight: '600', color: colors.textSecondary },
+  pickerRefActive: { color: colors.primary },
+  pickerName: { fontSize: typography.caption, color: colors.textMuted, marginTop: 2 },
 
   qrCard: {
     backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.xl,

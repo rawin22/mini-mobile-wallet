@@ -1,15 +1,16 @@
 import {
   View, Text, TextInput, Pressable, StyleSheet,
-  ActivityIndicator, ScrollView, Modal, FlatList,
+  ActivityIndicator, ScrollView, Modal, FlatList, RefreshControl,
 } from 'react-native';
-import { useState, useEffect } from 'react';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useAuth } from '../../src/hooks/useAuth';
 import { useLanguage } from '../../src/hooks/useLanguage';
 import { instantPaymentService } from '../../src/api/instant-payment.service';
 import { balanceService } from '../../src/api/balance.service';
+import { aliasService, type AccountAlias } from '../../src/api/alias.service';
 import { verifiedLinkService, type VerifiedLinkProfile } from '../../src/api/verified-link.service';
 import { formatCurrency, todayDateString } from '../../src/utils/formatters';
 import { storage } from '../../src/utils/storage';
@@ -18,6 +19,27 @@ import { colors, spacing, typography, radius } from '../../src/theme';
 import { CurrencyIcon, PinEntryModal } from '../../components/ui';
 
 type Step = 'lookup' | 'form' | 'review' | 'processing' | 'success';
+
+/** Extract a human-readable message from whatever shape the API returns in `problems`. */
+const extractProblemsMessage = (problems: unknown): string => {
+  if (!problems) return '';
+  if (typeof problems === 'string') return problems;
+  // Array of problem objects: [{ message, messageDetails, ... }]
+  if (Array.isArray(problems)) {
+    const first = problems[0];
+    if (first && typeof first === 'object') {
+      return (first as Record<string, unknown>).messageDetails as string
+        || (first as Record<string, unknown>).message as string
+        || JSON.stringify(first);
+    }
+  }
+  // Single problem object
+  if (typeof problems === 'object') {
+    const p = problems as Record<string, unknown>;
+    return p.messageDetails as string || p.message as string || JSON.stringify(problems);
+  }
+  return String(problems);
+};
 
 export default function PayNowScreen() {
   const { user } = useAuth();
@@ -38,12 +60,15 @@ export default function PayNowScreen() {
 
   // Payment form state
   const [balances, setBalances] = useState<CustomerBalanceData[]>([]);
-  const [toCustomer, setToCustomer] = useState(recipient ?? '');
+  const [myAliases, setMyAliases] = useState<AccountAlias[]>([]);
+  const [fromAlias, setFromAlias] = useState('');   // OUR alias — fromCustomer
+  const [toAlias, setToAlias] = useState('');        // RECIPIENT's alias — toCustomer
   const [amount, setAmount] = useState('');
   const [currency, setCurrency] = useState('');
   const [memo, setMemo] = useState('');
   const [paymentReference, setPaymentReference] = useState('');
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
+  const [showAliasPicker, setShowAliasPicker] = useState(false);
   const [showPinModal, setShowPinModal] = useState(false);
 
   useEffect(() => {
@@ -52,6 +77,13 @@ export default function PayNowScreen() {
       const active = (data.balances ?? []).filter((b) => b.balanceAvailable > 0);
       setBalances(active);
       if (active.length > 0) setCurrency(active[0].currencyCode);
+    }).catch(console.error);
+
+    // Fetch our own aliases — fromCustomer must be one of these
+    aliasService.getAliases(user.organizationId).then((list) => {
+      setMyAliases(list);
+      const def = list.find((a) => a.isDefault) ?? list[0];
+      if (def) setFromAlias(def.accountAlias);
     }).catch(console.error);
   }, [user]);
 
@@ -69,7 +101,13 @@ export default function PayNowScreen() {
         return;
       }
       setRecipientProfile(profile);
-      setToCustomer(profile.VerifiedLinkReference);
+      // Resolve recipient's alias via their customerId — that's what toCustomer must be
+      if (profile.customerId) {
+        const recipientAlias = await aliasService.getDefaultAlias(profile.customerId);
+        setToAlias(recipientAlias ?? profile.verifiedLinkReference);
+      } else {
+        setToAlias(profile.verifiedLinkReference);
+      }
     } catch {
       setError(t('payment.recipientNotFound') || 'Recipient not found. Please check the ID.');
     } finally {
@@ -104,7 +142,7 @@ export default function PayNowScreen() {
 
   const selectedBalance = balances.find((b) => b.currencyCode === currency);
   const parsedAmount = parseFloat(amount);
-  const isFormValid = toCustomer.trim() !== '' && parsedAmount > 0 && currency !== '';
+  const isFormValid = toAlias.trim() !== '' && fromAlias.trim() !== '' && parsedAmount > 0 && currency !== '';
 
   const handleSend = async () => {
     if (!user) return;
@@ -112,8 +150,8 @@ export default function PayNowScreen() {
     setError('');
     try {
       const createResult = await instantPaymentService.createPayment({
-        fromCustomer: user.userName,
-        toCustomer,
+        fromCustomer: fromAlias,
+        toCustomer: toAlias,
         paymentTypeId: 1,
         amount: parsedAmount,
         currencyCode: currency,
@@ -124,7 +162,7 @@ export default function PayNowScreen() {
       });
 
       if (createResult.problems) {
-        setError(String(createResult.problems));
+        setError(extractProblemsMessage(createResult.problems));
         setStep('review');
         return;
       }
@@ -137,7 +175,7 @@ export default function PayNowScreen() {
       });
 
       if (confirmResult.problems) {
-        setError(String(confirmResult.problems));
+        setError(extractProblemsMessage(confirmResult.problems));
         setStep('review');
         return;
       }
@@ -149,21 +187,29 @@ export default function PayNowScreen() {
     }
   };
 
-  const reset = () => {
+  const reset = useCallback(() => {
     setStep('lookup');
     setLookupId('');
     setRecipientProfile(null);
-    setToCustomer('');
+    setToAlias('');
     setAmount('');
     setMemo('');
     setError('');
-  };
+  }, []);
+
+  // Reset every time this tab comes into focus
+  useFocusEffect(reset);
 
   // ─── Render ───────────────────────────────────────────────────────────────
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-      <Text style={styles.title}>{t('payment.title') || 'Send Payment'}</Text>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      keyboardShouldPersistTaps="handled"
+      refreshControl={<RefreshControl refreshing={false} onRefresh={reset} tintColor={colors.primary} />}
+    >
+      <Text style={styles.title}>{t('nav.payNow') || 'Pay Now'}</Text>
 
       {error !== '' && (
         <View style={styles.errorBox}>
@@ -174,7 +220,7 @@ export default function PayNowScreen() {
       {/* ── Step: Lookup recipient ── */}
       {step === 'lookup' && (
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>{t('payment.searchRecipient') || 'Search Recipient'}</Text>
+          <Text style={styles.sectionTitle}>{t('payment.to') || 'To'}</Text>
 
           <View style={styles.searchRow}>
             <TextInput
@@ -197,25 +243,22 @@ export default function PayNowScreen() {
             <View style={styles.profileCard}>
               <View style={styles.profileHeader}>
                 <View style={styles.profileAvatar}>
-                  <Ionicons name="person" size={28} color={colors.textPrimary} />
+                  <Ionicons name="qr-code-outline" size={28} color={colors.textPrimary} />
                 </View>
                 <View style={styles.profileInfo}>
-                  <Text style={styles.profileName}>{recipientProfile.VerifiedLinkName}</Text>
-                  {recipientProfile.OrganizationName && (
-                    <Text style={styles.profileOrg}>{recipientProfile.OrganizationName}</Text>
-                  )}
-                  <Text style={styles.profileRef}>{recipientProfile.VerifiedLinkReference}</Text>
+                  {/* ZKQR — Zero Knowledge: show only the VLink reference, never the recipient name */}
+                  <Text style={styles.profileName}>{recipientProfile.verifiedLinkReference}</Text>
                 </View>
-                {(recipientProfile.IsVerified || recipientProfile.Status === 'Verified') && (
+                {recipientProfile.verifiedLinkStatusTypeName === 'Active' && (
                   <View style={styles.verifiedBadge}>
                     <Ionicons name="checkmark-circle" size={14} color={colors.accent} />
-                    <Text style={styles.verifiedText}>{t('payment.recipientVerified') || 'Verified'}</Text>
+                    <Text style={styles.verifiedText}>{t('payment.recipientVerified') || 'Active'}</Text>
                   </View>
                 )}
               </View>
-              {recipientProfile.TrustScore !== undefined && (
+              {recipientProfile.verifiedLinkStatusTypeName !== undefined && (
                 <Text style={styles.trustScore}>
-                  {t('payment.trustScore') || 'Trust Score'}: {recipientProfile.TrustScore}
+                  {recipientProfile.verifiedLinkStatusTypeName}
                 </Text>
               )}
               <Pressable style={styles.button} onPress={() => setStep('form')}>
@@ -237,10 +280,26 @@ export default function PayNowScreen() {
       {/* ── Step: Payment form ── */}
       {step === 'form' && (
         <View style={styles.card}>
+          {/* FROM: our alias — show picker if we have multiple */}
+          <Text style={styles.label}>From</Text>
+          {myAliases.length > 1 ? (
+            <Pressable style={styles.pickerButton} onPress={() => setShowAliasPicker(true)}>
+              <Text style={styles.pickerValue}>{fromAlias}</Text>
+              <Text style={styles.pickerChevron}>▾</Text>
+            </Pressable>
+          ) : (
+            <View style={[styles.input, { justifyContent: 'center' }]}>
+              <Text style={{ color: colors.textPrimary }}>{fromAlias}</Text>
+            </View>
+          )}
+
           <Text style={styles.label}>{t('payment.to') || 'To'}</Text>
-          <TextInput style={styles.input} value={toCustomer} onChangeText={setToCustomer}
-            placeholder="recipient" placeholderTextColor={colors.textMuted}
-            autoCapitalize="none" autoCorrect={false} />
+          {/* Show VLink reference to user (ZKQR), but toAlias is what we actually send */}
+          <View style={[styles.input, { justifyContent: 'center' }]}>
+            <Text style={{ color: colors.textPrimary }}>
+              {recipientProfile?.verifiedLinkReference ?? toAlias}
+            </Text>
+          </View>
 
           <Text style={styles.label}>{t('payment.amount') || 'Amount'}</Text>
           <TextInput style={styles.input} value={amount} onChangeText={setAmount}
@@ -278,7 +337,8 @@ export default function PayNowScreen() {
           <Text style={styles.sectionTitle}>{t('payment.reviewSend') || 'Review & Send'}</Text>
           <View style={styles.reviewRow}>
             <Text style={styles.reviewLabel}>{t('payment.to') || 'To'}</Text>
-            <Text style={styles.reviewValue}>{toCustomer}</Text>
+            {/* Show the VLink reference for ZKQR payments, not the internal customerId */}
+            <Text style={styles.reviewValue}>{recipientProfile?.verifiedLinkReference ?? toAlias}</Text>
           </View>
           <View style={styles.reviewRow}>
             <Text style={styles.reviewLabel}>{t('payment.amount') || 'Amount'}</Text>
@@ -326,7 +386,7 @@ export default function PayNowScreen() {
           </View>
           <View style={styles.reviewRow}>
             <Text style={styles.reviewLabel}>{t('payment.to') || 'To'}</Text>
-            <Text style={styles.reviewValue}>{toCustomer}</Text>
+            <Text style={styles.reviewValue}>{recipientProfile?.verifiedLinkReference ?? toAlias}</Text>
           </View>
           <View style={styles.reviewRow}>
             <Text style={styles.reviewLabel}>{t('payment.amount') || 'Amount'}</Text>
@@ -343,6 +403,28 @@ export default function PayNowScreen() {
           </View>
         </View>
       )}
+
+      {/* ── From alias picker modal ── */}
+      <Modal visible={showAliasPicker} transparent animationType="fade">
+        <Pressable style={styles.overlay} onPress={() => setShowAliasPicker(false)}>
+          <View style={styles.modal}>
+            <Text style={styles.modalTitle}>Pay from</Text>
+            <FlatList
+              data={myAliases}
+              keyExtractor={(item) => item.accountAlias}
+              renderItem={({ item }) => (
+                <Pressable
+                  style={[styles.option, item.accountAlias === fromAlias && styles.optionActive]}
+                  onPress={() => { setFromAlias(item.accountAlias); setShowAliasPicker(false); }}
+                >
+                  <Text style={styles.optionText}>{item.accountAlias}</Text>
+                  {item.isDefault && <Text style={styles.optionSub}>Default</Text>}
+                </Pressable>
+              )}
+            />
+          </View>
+        </Pressable>
+      </Modal>
 
       {/* ── Currency picker modal ── */}
       <Modal visible={showCurrencyPicker} transparent animationType="fade">

@@ -2,6 +2,7 @@ import {
   View, Text, ScrollView, StyleSheet, ActivityIndicator,
   Pressable, Linking, Modal, FlatList,
 } from 'react-native';
+import QRCode from 'react-native-qrcode-svg';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,6 +10,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../../src/hooks/useAuth';
 import { useLanguage } from '../../src/hooks/useLanguage';
 import { verificationService } from '../../src/api/verification.service';
+import { buildVlinkUrl } from '../../src/api/verified-link.service';
 import { storage } from '../../src/utils/storage';
 import { formatDateTime } from '../../src/utils/formatters';
 import { InfoRow } from '../../components/ui';
@@ -38,37 +40,30 @@ export default function ProfileScreen() {
     setHasPin(storage.hasPin());
   }, []);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const searchResults = await verificationService.searchVerifiedLinks();
-        const displays: VLinkDisplay[] = [];
-        for (const vl of searchResults) {
-          const id = (vl.verifiedLinkId ?? vl.VerifiedLinkId) as string;
-          const ref = (vl.verifiedLinkReference ?? vl.VerifiedLinkReference) as string;
-          const name = (vl.verifiedLinkName ?? vl.VerifiedLinkName) as string;
-          const statusId = (vl.verifiedLinkStatusTypeId ?? vl.VerifiedLinkStatusTypeId) as number;
-          const statusName = (vl.verifiedLinkStatusTypeName ?? vl.VerifiedLinkStatusTypeName) as string;
-          let url = '';
-          try {
-            const full = await verificationService.getVerifiedLink(id);
-            url = (full?.verifiedLinkUrl ?? full?.VerifiedLinkUrl ?? '') as string;
-          } catch { /* leave url empty */ }
-          displays.push({ id, reference: ref, name, statusId, statusName, url });
-        }
-        setVlinks(displays);
-      } catch {
-        setVlinks([]);
-      } finally {
-        setVlinkLoading(false);
-      }
-    })();
-  }, []);
+  const loadVlinks = () => {
+    setVlinkLoading(true);
+    verificationService.searchVerifiedLinks()
+      .then((results) => {
+        setVlinks(results.map((vl) => ({
+          id: (vl.verifiedLinkId ?? vl.VerifiedLinkId) as string,
+          reference: (vl.verifiedLinkReference ?? vl.VerifiedLinkReference) as string,
+          name: (vl.verifiedLinkName ?? vl.VerifiedLinkName) as string,
+          statusId: (vl.verifiedLinkStatusTypeId ?? vl.VerifiedLinkStatusTypeId) as number,
+          statusName: (vl.verifiedLinkStatusTypeName ?? vl.VerifiedLinkStatusTypeName) as string,
+          url: buildVlinkUrl((vl.verifiedLinkId ?? vl.VerifiedLinkId) as string),
+        })));
+      })
+      .catch(() => setVlinks([]))
+      .finally(() => setVlinkLoading(false));
+  };
+
+  useEffect(() => { loadVlinks(); }, []);
 
   const handleRefresh = async () => {
     setRefreshing(true);
     setRefreshMsg('');
     const ok = await refreshUser();
+    loadVlinks();
     setRefreshMsg(ok ? '✓ Settings updated' : 'Could not refresh — check connection');
     setRefreshing(false);
     setTimeout(() => setRefreshMsg(''), 3000);
@@ -164,22 +159,22 @@ export default function ProfileScreen() {
         ) : (
           vlinks.map((vl) => (
             <View key={vl.id} style={styles.vlinkItem}>
-              <InfoRow label={t('profile.vlinkReference') || 'Reference'} value={vl.reference} />
-              <InfoRow label={t('profile.vlinkName') || 'Name'} value={vl.name} />
-              <View style={styles.statusRow}>
-                <Text style={styles.statusLabel}>{t('profile.vlinkStatus') || 'Status'}</Text>
-                <View style={[styles.badge, { backgroundColor: `${statusColor(vl.statusId)}22` }]}>
-                  <Text style={[styles.badgeText, { color: statusColor(vl.statusId) }]}>
-                    {vl.statusName}
-                  </Text>
+              <View style={styles.vlinkHeader}>
+                <View style={styles.vlinkMeta}>
+                  <Text style={styles.vlinkRef}>{vl.reference}</Text>
+                  <Text style={styles.vlinkName}>{vl.name}</Text>
+                  <View style={[styles.badge, { backgroundColor: `${statusColor(vl.statusId)}22`, alignSelf: 'flex-start' }]}>
+                    <Text style={[styles.badgeText, { color: statusColor(vl.statusId) }]}>{vl.statusName}</Text>
+                  </View>
+                </View>
+                <View style={styles.vlinkQR}>
+                  <QRCode value={vl.url} size={90} color={colors.textPrimary} backgroundColor={colors.surface} />
                 </View>
               </View>
-              {!!vl.url && (
-                <Pressable style={styles.urlRow} onPress={() => Linking.openURL(vl.url)}>
-                  <Text style={styles.urlText} numberOfLines={1}>{vl.url}</Text>
-                  <Text style={styles.urlOpen}>Open ↗</Text>
-                </Pressable>
-              )}
+              <Pressable style={styles.urlRow} onPress={() => Linking.openURL(vl.url)}>
+                <Text style={styles.urlText} numberOfLines={1}>{vl.url}</Text>
+                <Text style={styles.urlOpen}>Open ↗</Text>
+              </Pressable>
             </View>
           ))
         )}
@@ -364,9 +359,15 @@ const styles = StyleSheet.create({
   settingValue: { fontSize: typography.small, color: colors.textPrimary, fontWeight: '500' },
 
   vlinkItem: {
-    gap: spacing.xs, paddingVertical: spacing.sm,
+    paddingVertical: spacing.sm,
     borderBottomWidth: 1, borderBottomColor: colors.border,
+    gap: spacing.xs,
   },
+  vlinkHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md },
+  vlinkMeta: { flex: 1, gap: spacing.xs },
+  vlinkRef: { fontSize: typography.body, fontWeight: '700', color: colors.textPrimary },
+  vlinkName: { fontSize: typography.caption, color: colors.textSecondary },
+  vlinkQR: { backgroundColor: colors.surface, padding: spacing.xs, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.border },
   urlRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingTop: spacing.xs },
   urlText: { flex: 1, fontSize: typography.caption, color: colors.primary },
   urlOpen: { fontSize: typography.caption, color: colors.primary, fontWeight: '600' },

@@ -297,9 +297,11 @@ export interface VerifiedLinkSearchRecord {
     CustomerName: string;
     MinimumWKYCLevel: number;
     IsPrimary: boolean;
+    IsDeleted?: boolean;
     CreatedTime: string;
     // camelCase alternatives from API
     verifiedLinkId?: string;
+    isDeleted?: boolean;
     verifiedLinkReference?: string;
     verifiedLinkName?: string;
     verifiedLinkStatusTypeId?: number;

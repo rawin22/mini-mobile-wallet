@@ -12,14 +12,18 @@ import { useLanguage } from '../../src/hooks/useLanguage';
 import {
   verificationService,
   buildIdDescription,
+  buildVlinkMessage,
   appendVerificationMetadata,
   mapOcrToFormData,
+  mergeOcrProperties,
+  parseDescriptionProperties,
   VerificationError,
 } from '../../src/api/verification.service';
+import { buildVlinkUrl } from '../../src/api/verified-link.service';
 import { FileAttachmentTypeId, type CountryInfo, type CountryIdentificationType, type VerificationFormData } from '../../src/types/verification.types';
 import { colors, spacing, typography, radius } from '../../src/theme';
 
-type Step = 'id-front' | 'selfie' | 'details' | 'submitting' | 'done';
+type Step = 'loading' | 'id-front' | 'id-back' | 'selfie' | 'details' | 'submitting' | 'done';
 
 const GENDER_OPTIONS = [
   { id: 1, label: 'Male' },
@@ -48,13 +52,14 @@ export default function GetVerifiedScreen() {
   const { user } = useAuth();
   const { t } = useLanguage();
 
-  const [step, setStep] = useState<Step>('id-front');
+  const [step, setStep] = useState<Step>('loading');
   const [showDocCamera, setShowDocCamera] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
 
   // Uploaded file IDs
   const [frontFileId, setFrontFileId] = useState('');
+  const [backFileId, setBackFileId] = useState('');
   const [selfieFileId, setSelfieFileId] = useState('');
 
   // VLink result shown on done screen
@@ -80,15 +85,83 @@ export default function GetVerifiedScreen() {
   // In GPWeb, the customerId is the organizationId from user settings
   const resolvedCustomerId = user?.organizationId ?? '';
 
-  // Load countries when entering step 3
+  // ── Step detection on load ──────────────────────────────────────────────────
   useEffect(() => {
-    if (step !== 'details') return;
+    if (!resolvedCustomerId) return;
+    verificationService.getFileAttachmentInfoList(resolvedCustomerId)
+      .then((attachments) => {
+        const hasFront = attachments.some(
+          (a) => (a.FileAttachmentTypeId ?? a.fileAttachmentTypeId) === 1,
+        );
+        const hasBack = attachments.some(
+          (a) => (a.FileAttachmentTypeId ?? a.fileAttachmentTypeId) === 2,
+        );
+        const hasSelfie = attachments.some(
+          (a) => (a.FileAttachmentTypeId ?? a.fileAttachmentTypeId) === 3,
+        );
+
+        const frontFile = attachments.find(
+          (a) => (a.FileAttachmentTypeId ?? a.fileAttachmentTypeId) === 1,
+        );
+        const backFile = attachments.find(
+          (a) => (a.FileAttachmentTypeId ?? a.fileAttachmentTypeId) === 2,
+        );
+        const selfieFile = attachments.find(
+          (a) => (a.FileAttachmentTypeId ?? a.fileAttachmentTypeId) === 3,
+        );
+
+        if (frontFile) setFrontFileId(frontFile.FileAttachmentId);
+        if (backFile) setBackFileId(backFile.FileAttachmentId);
+        if (selfieFile) setSelfieFileId(selfieFile.FileAttachmentId);
+
+        // Restore OCR data from merged front + back properties
+        const merged = mergeOcrProperties(
+          frontFile?.Properties ?? frontFile?.properties,
+          backFile?.Properties ?? backFile?.properties,
+        );
+        if (Object.keys(merged).length > 0) {
+          const ocr = mapOcrToFormData(merged);
+          setForm((prev) => ({
+            ...prev,
+            ...ocr,
+            firstName: prev.firstName || user?.firstName || '',
+            lastName: prev.lastName || user?.lastName || '',
+          }));
+        }
+
+        const desc = frontFile?.Description ?? frontFile?.description ?? '';
+        if (desc.includes('get_verified_vlink_id:')) {
+          // Already submitted — restore done state
+          const props = parseDescriptionProperties(desc);
+          const restoredVlinkId = props['get_verified_vlink_id'] ?? '';
+          const restoredRef = props['get_verified_vlink_reference'] ?? '';
+          setVlinkId(restoredVlinkId);
+          setVlinkReference(restoredRef);
+          setVlinkUrl(restoredVlinkId ? buildVlinkUrl(restoredVlinkId) : '');
+          setStep('done');
+        } else if (hasFront && hasSelfie) {
+          setStep('details');
+        } else if (hasFront && !hasSelfie) {
+          // Check if back is still needed: if no back file but we need one,
+          // go to id-back; otherwise go to selfie
+          // We don't know RequireBackSide here without the ID type, so go to selfie
+          // (user can go back and re-upload back if needed)
+          setStep('selfie');
+        } else {
+          setStep('id-front');
+        }
+      })
+      .catch(() => setStep('id-front'));
+  }, [resolvedCustomerId]);
+
+  // Load countries on mount so they're ready for Step 1 pickers
+  useEffect(() => {
     setLoadingCountries(true);
     verificationService.getCountryList()
       .then(setCountries)
-      .catch(() => setError('Could not load country list.'))
+      .catch(() => {})
       .finally(() => setLoadingCountries(false));
-  }, [step]);
+  }, []);
 
   // Load ID types when country of issuance changes
   useEffect(() => {
@@ -99,6 +172,9 @@ export default function GetVerifiedScreen() {
       .catch(() => setIdTypes([]))
       .finally(() => setLoadingIdTypes(false));
   }, [form.countryOfIssuance]);
+
+  const selectedIdType = idTypes.find((t) => t.CountryIdentificationTypeName === form.idType);
+  const requireBackSide = selectedIdType?.RequireBackSide ?? false;
 
   const requestPermission = async (type: 'camera' | 'library'): Promise<boolean> => {
     if (type === 'camera') {
@@ -125,8 +201,6 @@ export default function GetVerifiedScreen() {
       mediaTypes: ['images'],
       quality: 0.85,
       base64: true,
-      // For documents (not selfie): enable crop overlay locked to landscape 3:2
-      // This covers passport data pages (~1.42:1) and standard ID-1 cards (~1.58:1)
       allowsEditing: !frontCamera,
       aspect: frontCamera ? undefined : ([3, 2] as [number, number]),
       ...(source === 'camera' ? { cameraType: frontCamera ? ImagePicker.CameraType.front : ImagePicker.CameraType.back } : {}),
@@ -148,11 +222,12 @@ export default function GetVerifiedScreen() {
     return 'Upload failed. Please try again.';
   };
 
-  // Shared upload logic for ID front — called from both camera and library paths
+  // ── Upload ID front ─────────────────────────────────────────────────────────
   const uploadIdFrontBase64 = async (base64: string) => {
     const customerId = resolvedCustomerId;
     if (!customerId) { setError('User customer ID not found. Please log in again.'); return; }
     setUploading(true);
+    setError('');
     console.log('[KYC] Uploading ID front, customerId:', customerId);
     try {
       const result = await verificationService.uploadFile({
@@ -179,23 +254,21 @@ export default function GetVerifiedScreen() {
       console.log('[KYC] ID front uploaded:', result.FileAttachmentId);
       setFrontFileId(result.FileAttachmentId);
 
-      if (result.Properties) {
-        const ocr = mapOcrToFormData(result.Properties);
-        setForm((prev) => ({
-          ...prev,
-          ...ocr,
-          firstName: prev.firstName || user?.firstName || '',
-          lastName: prev.lastName || user?.lastName || '',
-        }));
-      } else {
-        setForm((prev) => ({
-          ...prev,
-          firstName: prev.firstName || user?.firstName || '',
-          lastName: prev.lastName || user?.lastName || '',
-        }));
-      }
+      // Merge OCR into form
+      const ocr = result.Properties ? mapOcrToFormData(result.Properties) : {};
+      setForm((prev) => ({
+        ...prev,
+        ...ocr,
+        firstName: prev.firstName || ocr.firstName || user?.firstName || '',
+        lastName: prev.lastName || ocr.lastName || user?.lastName || '',
+      }));
 
-      setStep('selfie');
+      // Go to back upload if required, otherwise selfie
+      if (requireBackSide) {
+        setStep('id-back');
+      } else {
+        setStep('selfie');
+      }
     } catch (err) {
       setError(extractApiError(err));
     } finally {
@@ -206,7 +279,6 @@ export default function GetVerifiedScreen() {
   const handleUploadIdFront = async (source: 'camera' | 'library') => {
     setError('');
     if (source === 'camera') {
-      // Open the live document camera overlay instead of the system camera
       setShowDocCamera(true);
       return;
     }
@@ -220,6 +292,72 @@ export default function GetVerifiedScreen() {
     await uploadIdFrontBase64(base64);
   };
 
+  // ── Upload ID back ──────────────────────────────────────────────────────────
+  const uploadIdBackBase64 = async (base64: string) => {
+    const customerId = resolvedCustomerId;
+    if (!customerId) { setError('User customer ID not found.'); return; }
+    setUploading(true);
+    setError('');
+    console.log('[KYC] Uploading ID back, customerId:', customerId);
+    try {
+      const result = await verificationService.uploadFile({
+        ParentObjectId: customerId,
+        ParentObjectTypeId: 21,
+        SourceIP: '',
+        FileAttachmentTypeId: FileAttachmentTypeId.ProofOfIdentityBack,
+        FileAttachmentSubTypeId: 0,
+        SumSubTypeId: 0,
+        FileName: `id_back_${Date.now()}.jpg`,
+        GroupName: '',
+        Properties: null,
+        IsPrimary: false,
+        ContainsFront: false,
+        ContainsBack: true,
+        ViewableByBanker: true,
+        ViewableByCustomer: true,
+        DeletableByCustomer: false,
+        Description: 'documentType: Proof of Identity (Back)',
+        BypassFileAnalysis: false,
+        FileData: base64,
+      });
+
+      console.log('[KYC] ID back uploaded:', result.FileAttachmentId);
+      setBackFileId(result.FileAttachmentId);
+
+      // Merge back OCR into form (front takes priority via mergeOcrProperties)
+      if (result.Properties) {
+        const ocr = mapOcrToFormData(result.Properties);
+        setForm((prev) => ({
+          ...prev,
+          // Only fill fields that are still empty
+          idNumber: prev.idNumber || ocr.idNumber || '',
+          expirationDate: prev.expirationDate || ocr.expirationDate || '',
+          dateOfBirth: prev.dateOfBirth || ocr.dateOfBirth || '',
+        }));
+      }
+
+      setStep('selfie');
+    } catch (err) {
+      setError(extractApiError(err));
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleUploadIdBack = async (source: 'camera' | 'library') => {
+    setError('');
+    if (source === 'camera') {
+      const base64 = await pickImage('camera', false);
+      if (!base64) return;
+      await uploadIdBackBase64(base64);
+    } else {
+      const base64 = await pickImage('library', false);
+      if (!base64) return;
+      await uploadIdBackBase64(base64);
+    }
+  };
+
+  // ── Upload selfie ───────────────────────────────────────────────────────────
   const handleUploadSelfie = async (source: 'camera' | 'library') => {
     setError('');
     const customerId = resolvedCustomerId;
@@ -247,7 +385,7 @@ export default function GetVerifiedScreen() {
         ViewableByCustomer: true,
         DeletableByCustomer: false,
         Description: 'Selfie Photo',
-        BypassFileAnalysis: false,
+        BypassFileAnalysis: true,
         FileData: base64,
       });
 
@@ -270,6 +408,7 @@ export default function GetVerifiedScreen() {
     return null;
   };
 
+  // ── Submit: 5-call sequence ─────────────────────────────────────────────────
   const handleSubmit = async () => {
     const validationError = validateDetails();
     if (validationError) { setError(validationError); return; }
@@ -286,16 +425,49 @@ export default function GetVerifiedScreen() {
 
     try {
       const customerName = fullName || userName;
-      const verifyUrl = `https://fx.worldkyc.com/verify/${customerId}`;
+      const baseDesc = buildIdDescription(form);
+      const vlinkMessage = buildVlinkMessage(form, userId, userName, fullName);
 
-      // 1. Create verified link
+      // ── Call 1: PATCH FileAttachment — update front with corrected description ──
+      await verificationService.updateFileAttachment({
+        FileAttachmentId: frontFileId,
+        GroupName: '',
+        FileAttachmentTypeId: FileAttachmentTypeId.ProofOfIdentityFront,
+        ViewableByBanker: true,
+        ViewableByCustomer: true,
+        DeletableByCustomer: false,
+        Description: baseDesc,
+      });
+      console.log('[KYC] Call 1: Front file description updated');
+
+      // ── Call 2: PATCH Customer (bank token) — save OCR/corrected data ──
+      await verificationService.updateCustomer({
+        CustomerId: customerId,
+        FirstName: form.firstName,
+        MiddleName: form.middleName,
+        LastName: form.lastName,
+        Nationality: form.nationality,
+        GenderTypeId: form.genderTypeId,
+        DateOfBirth: form.dateOfBirth || null,
+        CityOfBirth: form.placeOfBirth,
+        CountryOfBirthCode: form.countryOfIssuance,
+        CountryCode: form.countryOfIssuance,
+        IdentificationTypeId: selectedIdType?.IdentificationTypeID ?? 0,
+        IdentificationNumber: form.idNumber,
+        IdentificationIssuer: form.issuerName,
+        IdentificationCountryCode: form.countryOfIssuance,
+        IdentificationExpirationDate: form.expirationDate || null,
+      });
+      console.log('[KYC] Call 2: Customer profile updated');
+
+      // ── Call 3: POST VerifiedLink ──
       const vlink = await verificationService.createVerifiedLink({
-        VerifiedLinkTypeId: 3,
+        VerifiedLinkTypeId: 4,
         VerifiedLinkName: customerName,
         CustomerId: customerId,
         GroupName: '',
         MinimumWKYCLevel: 0,
-        Message: `Identity verification request for ${customerName}`,
+        Message: vlinkMessage,
         PublicMessage: '',
         BlockchainMessage: '',
         SharedWithName: '',
@@ -320,18 +492,17 @@ export default function GetVerifiedScreen() {
         ShareSelfie: true,
         IsPrimary: true,
       });
+      console.log('[KYC] Call 3: VLink created:', vlink.VerifiedLinkId, vlink.VerifiedLinkReference);
 
-      console.log('[KYC] VLink created:', vlink.VerifiedLinkId, vlink.VerifiedLinkReference);
-
-      // 2. Update VLink with the verify URL and all share settings
-      const vlinkVerifyUrl = `https://fx.worldkyc.com/verify/${vlink.VerifiedLinkReference}`;
+      // ── Call 4: PATCH VerifiedLink — set URL ──
+      const vlinkVerifyUrl = buildVlinkUrl(vlink.VerifiedLinkId);
       await verificationService.updateVerifiedLink({
         VerifiedLinkId: vlink.VerifiedLinkId,
-        VerifiedLinkTypeId: 3,
+        VerifiedLinkTypeId: 4,
         VerifiedLinkName: customerName,
         GroupName: '',
         MinimumWKYCLevel: 0,
-        Message: `Identity verification request for ${customerName}`,
+        Message: vlinkMessage,
         PublicMessage: '',
         BlockchainMessage: '',
         SharedWithName: '',
@@ -370,11 +541,9 @@ export default function GetVerifiedScreen() {
         NFTChain: '',
         IsPrimary: true,
       });
+      console.log('[KYC] Call 4: VLink updated with URL:', vlinkVerifyUrl);
 
-      console.log('[KYC] VLink updated with URL:', vlinkVerifyUrl);
-
-      // 3. Attach metadata to ID front file
-      const baseDesc = buildIdDescription(form);
+      // ── Call 5: PATCH FileAttachment — append VLink metadata to front file ──
       const fullDesc = appendVerificationMetadata(
         baseDesc,
         userId,
@@ -383,7 +552,6 @@ export default function GetVerifiedScreen() {
         vlink.VerifiedLinkId,
         vlink.VerifiedLinkReference,
       );
-
       await verificationService.updateFileAttachment({
         FileAttachmentId: frontFileId,
         GroupName: '',
@@ -393,8 +561,8 @@ export default function GetVerifiedScreen() {
         DeletableByCustomer: false,
         Description: fullDesc,
       });
+      console.log('[KYC] Call 5: VLink metadata appended to front file');
 
-      console.log('[KYC] File attachment updated with metadata');
       setVlinkId(vlink.VerifiedLinkId);
       setVlinkReference(vlink.VerifiedLinkReference);
       setVlinkUrl(vlinkVerifyUrl);
@@ -407,14 +575,21 @@ export default function GetVerifiedScreen() {
   };
 
   const selectedCountry = countries.find((c) => (c.CountryCode || c.countryCode) === form.countryOfIssuance);
-  const selectedIdType = idTypes.find((t) => t.CountryIdentificationTypeName === form.idType);
   const selectedGender = GENDER_OPTIONS.find((g) => g.id === form.genderTypeId);
+
+  // ─── Step: Loading ────────────────────────────────────────────────────────
+  if (step === 'loading') {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
 
   // ─── Step: ID Front ───────────────────────────────────────────────────────
   if (step === 'id-front') {
     return (
       <View style={{ flex: 1 }}>
-        {/* Full-screen live document camera overlay */}
         <Modal visible={showDocCamera} animationType="slide" statusBarTranslucent>
           <DocumentCamera
             onCapture={handleDocCameraCapture}
@@ -426,24 +601,152 @@ export default function GetVerifiedScreen() {
           <Text style={styles.title}>{t('verification.title') || 'Get Verified'}</Text>
           <Text style={styles.stepLabel}>{t('verification.step1Label') || 'Step 1 of 3'}</Text>
           <Text style={styles.stepTitle}>{t('verification.step1Title') || 'Upload ID Document'}</Text>
-          <Text style={styles.stepDesc}>{t('verification.step1Hint') || 'Take a clear photo of the front of your government-issued ID.'}</Text>
+          <Text style={styles.stepDesc}>{t('verification.step1Hint') || 'Select your country and ID type, then take a photo of the front.'}</Text>
 
           {!!error && <View style={styles.errorBox}><Text style={styles.errorText}>{error}</Text></View>}
 
-          {uploading ? (
-            <ActivityIndicator size="large" color={colors.primary} style={styles.loader} />
-          ) : (
-            <View style={styles.card}>
-              <Pressable style={styles.uploadBtn} onPress={() => handleUploadIdFront('camera')}>
-                <Text style={styles.uploadBtnText}>📷  {t('verification.takePhoto') || 'Take Photo'}</Text>
+          <View style={styles.card}>
+            {/* Country picker */}
+            <Text style={styles.label}>{t('verification.countryOfIssuance') || 'Country of Issuance'} *</Text>
+            {loadingCountries ? (
+              <ActivityIndicator color={colors.primary} style={styles.miniLoader} />
+            ) : (
+              <Pressable style={styles.pickerBtn} onPress={() => setShowCountryPicker(true)}>
+                <Text style={styles.pickerValue}>
+                  {selectedCountry
+                    ? (selectedCountry.CountryName || selectedCountry.countryName)
+                    : (t('verification.selectCountry') || 'Select country')}
+                </Text>
+                <Text style={styles.chevron}>▾</Text>
               </Pressable>
-              <Pressable style={[styles.uploadBtn, styles.uploadBtnAlt]} onPress={() => handleUploadIdFront('library')}>
-                <Text style={styles.uploadBtnText}>🖼  {t('verification.chooseLibrary') || 'Choose from Library'}</Text>
+            )}
+
+            {/* ID type picker */}
+            <Text style={styles.label}>{t('verification.idType') || 'ID Type'} *</Text>
+            {loadingIdTypes ? (
+              <ActivityIndicator color={colors.primary} style={styles.miniLoader} />
+            ) : (
+              <Pressable
+                style={styles.pickerBtn}
+                onPress={() => form.countryOfIssuance ? setShowIdTypePicker(true) : setError('Please select a country first.')}
+              >
+                <Text style={styles.pickerValue}>
+                  {selectedIdType
+                    ? (selectedIdType.CountryIdentificationTypeEnglishName || selectedIdType.CountryIdentificationTypeName)
+                    : (t('verification.selectIdType') || 'Select ID type')}
+                </Text>
+                <Text style={styles.chevron}>▾</Text>
               </Pressable>
-            </View>
-          )}
+            )}
+
+            {requireBackSide && (
+              <Text style={styles.backSideNote}>⚠️ This ID type requires front AND back photos.</Text>
+            )}
+
+            {uploading ? (
+              <ActivityIndicator size="large" color={colors.primary} style={styles.loader} />
+            ) : (
+              <>
+                <Pressable style={[styles.uploadBtn, { marginTop: spacing.md }]} onPress={() => handleUploadIdFront('camera')}>
+                  <Text style={styles.uploadBtnText}>📷  {t('verification.takePhoto') || 'Take Photo'}</Text>
+                </Pressable>
+                <Pressable style={[styles.uploadBtn, styles.uploadBtnAlt]} onPress={() => handleUploadIdFront('library')}>
+                  <Text style={styles.uploadBtnText}>🖼  {t('verification.chooseLibrary') || 'Choose from Library'}</Text>
+                </Pressable>
+              </>
+            )}
+          </View>
         </ScrollView>
+
+        {/* Country Picker Modal */}
+        <Modal visible={showCountryPicker} transparent animationType="fade">
+          <Pressable style={styles.overlay} onPress={() => setShowCountryPicker(false)}>
+            <View style={styles.modal}>
+              <Text style={styles.modalTitle}>{t('verification.countryOfIssuance') || 'Country of Issuance'}</Text>
+              <FlatList
+                data={countries}
+                keyExtractor={(item) => item.CountryCode || item.countryCode || ''}
+                renderItem={({ item }) => {
+                  const code = item.CountryCode || item.countryCode || '';
+                  const name = item.CountryName || item.countryName || '';
+                  return (
+                    <Pressable
+                      style={[styles.option, code === form.countryOfIssuance && styles.optionActive]}
+                      onPress={() => {
+                        set('countryOfIssuance')(code);
+                        set('idType')('');
+                        setShowCountryPicker(false);
+                      }}
+                    >
+                      <Text style={styles.optionText}>{name}</Text>
+                      <Text style={styles.optionSub}>{code}</Text>
+                    </Pressable>
+                  );
+                }}
+              />
+            </View>
+          </Pressable>
+        </Modal>
+
+        {/* ID Type Picker Modal */}
+        <Modal visible={showIdTypePicker} transparent animationType="fade">
+          <Pressable style={styles.overlay} onPress={() => setShowIdTypePicker(false)}>
+            <View style={styles.modal}>
+              <Text style={styles.modalTitle}>{t('verification.idType') || 'ID Type'}</Text>
+              <FlatList
+                data={idTypes}
+                keyExtractor={(item) => String(item.CountryIdentificationTypeID)}
+                renderItem={({ item }) => (
+                  <Pressable
+                    style={[styles.option, item.CountryIdentificationTypeName === form.idType && styles.optionActive]}
+                    onPress={() => {
+                      set('idType')(item.CountryIdentificationTypeName);
+                      setShowIdTypePicker(false);
+                    }}
+                  >
+                    <Text style={styles.optionText}>
+                      {item.CountryIdentificationTypeEnglishName || item.CountryIdentificationTypeName}
+                    </Text>
+                    {item.RequireBackSide && (
+                      <Text style={styles.optionSub}>Requires front + back</Text>
+                    )}
+                  </Pressable>
+                )}
+              />
+            </View>
+          </Pressable>
+        </Modal>
       </View>
+    );
+  }
+
+  // ─── Step: ID Back ────────────────────────────────────────────────────────
+  if (step === 'id-back') {
+    return (
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        <Text style={styles.title}>{t('verification.title') || 'Get Verified'}</Text>
+        <Text style={styles.stepLabel}>{t('verification.step1bLabel') || 'Step 1b of 3'}</Text>
+        <Text style={styles.stepTitle}>{t('verification.step1bTitle') || 'Upload Back of ID'}</Text>
+        <Text style={styles.stepDesc}>{t('verification.step1bHint') || 'Now take a photo of the back of your ID document.'}</Text>
+
+        {!!error && <View style={styles.errorBox}><Text style={styles.errorText}>{error}</Text></View>}
+
+        {uploading ? (
+          <ActivityIndicator size="large" color={colors.primary} style={styles.loader} />
+        ) : (
+          <View style={styles.card}>
+            <Pressable style={styles.uploadBtn} onPress={() => handleUploadIdBack('camera')}>
+              <Text style={styles.uploadBtnText}>📷  {t('verification.takePhoto') || 'Take Photo'}</Text>
+            </Pressable>
+            <Pressable style={[styles.uploadBtn, styles.uploadBtnAlt]} onPress={() => handleUploadIdBack('library')}>
+              <Text style={styles.uploadBtnText}>🖼  {t('verification.chooseLibrary') || 'Choose from Library'}</Text>
+            </Pressable>
+            <Pressable style={styles.backBtn} onPress={() => setStep('id-front')}>
+              <Text style={styles.backBtnText}>← {t('common.back') || 'Back'}</Text>
+            </Pressable>
+          </View>
+        )}
+      </ScrollView>
     );
   }
 
@@ -468,7 +771,7 @@ export default function GetVerifiedScreen() {
             <Pressable style={[styles.uploadBtn, styles.uploadBtnAlt]} onPress={() => handleUploadSelfie('library')}>
               <Text style={styles.uploadBtnText}>🖼  {t('verification.chooseLibrary') || 'Choose from Library'}</Text>
             </Pressable>
-            <Pressable style={styles.backBtn} onPress={() => setStep('id-front')}>
+            <Pressable style={styles.backBtn} onPress={() => setStep(backFileId ? 'id-back' : 'id-front')}>
               <Text style={styles.backBtnText}>← {t('common.back') || 'Back'}</Text>
             </Pressable>
           </View>
@@ -631,6 +934,9 @@ export default function GetVerifiedScreen() {
                     <Text style={styles.optionText}>
                       {item.CountryIdentificationTypeEnglishName || item.CountryIdentificationTypeName}
                     </Text>
+                    {item.RequireBackSide && (
+                      <Text style={styles.optionSub}>Requires front + back</Text>
+                    )}
                   </Pressable>
                 )}
               />
@@ -733,6 +1039,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     padding: spacing.md,
+  },
+
+  backSideNote: {
+    fontSize: typography.caption,
+    color: colors.warning,
+    marginTop: spacing.xs,
+    marginBottom: spacing.xs,
   },
 
   uploadBtn: {

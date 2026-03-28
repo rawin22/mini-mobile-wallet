@@ -18,7 +18,7 @@ export interface InstantPaymentDraft {
 
 export interface InstantPaymentCreateResponse {
   payment: InstantPaymentDraft;
-  problems: null | string;
+  problems: null | string | unknown;
 }
 
 export interface InstantPaymentPostRequest {
@@ -28,5 +28,5 @@ export interface InstantPaymentPostRequest {
 
 export interface InstantPaymentPostResponse {
   payment: null;
-  problems: null | string;
+  problems: null | string | unknown;
 }
