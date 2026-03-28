@@ -6,10 +6,10 @@
   <p>A modern, multi-currency financial mobile wallet with KYC verification, instant payments, and FX exchange — built for the Winstant ecosystem.</p>
 
   <p>
-    <img src="https://img.shields.io/badge/React_Native-0.76-61DAFB?logo=react&logoColor=white&labelColor=20232a" />
-    <img src="https://img.shields.io/badge/Expo-52-000020?logo=expo&logoColor=white" />
-    <img src="https://img.shields.io/badge/TypeScript-5.3-3178C6?logo=typescript&logoColor=white&labelColor=1e1e2e" />
-    <img src="https://img.shields.io/badge/Expo_Router-4.0-000020?logo=expo&logoColor=white" />
+    <img src="https://img.shields.io/badge/React_Native-0.81.5-61DAFB?logo=react&logoColor=white&labelColor=20232a" />
+    <img src="https://img.shields.io/badge/Expo-54-000020?logo=expo&logoColor=white" />
+    <img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white&labelColor=1e1e2e" />
+    <img src="https://img.shields.io/badge/Expo_Router-6.0-000020?logo=expo&logoColor=white" />
     <img src="https://img.shields.io/badge/Axios-1.13-5A29E4?logo=axios&logoColor=white&labelColor=1e1e2e" />
   </p>
   <p>
@@ -24,10 +24,28 @@
 
 ## Overview
 
-`mini-mobile-wallet` is a React Native (Expo) port of the `mini-wallet` web application. It shares the same API layer and business logic, adapted for native mobile platforms.
+`mini-mobile-wallet` is a React Native (Expo) port of the `mini-wallet` web application. It shares the same API layer and business logic, adapted for native mobile platforms using Expo Router for file-based navigation.
 
-**Migration from:** `mini-wallet` (React + Vite + react-router-dom)
-**Migration to:** React Native + Expo Router (file-based routing)
+---
+
+## Features
+
+| Feature | Description |
+|---|---|
+| **Authentication** | Login with Remember Me / auto-login, full signup with field validation |
+| **Dashboard** | Multi-currency balance cards, hide-zero toggle, favourites, quick exchange widget |
+| **Send a Payment** | StealthID recipient lookup, QR code scanner, PIN-protected confirmation |
+| **Receive a Payment** | Personal QR code display, tap-to-copy StealthID, share payment link |
+| **FX Exchange** | Get live quotes, countdown timer, PIN-protected deal booking |
+| **Payment History** | Paginated list of sent payments with reference and status |
+| **Exchange History** | List of booked FX deals with rates, amounts, and value dates |
+| **Account Statement** | Per-account transaction history with period filter |
+| **Identity Verification** | 4-step KYC flow (personal info, ID document, selfie, review) |
+| **Security / PIN** | 6-digit PIN setup and change; required for payments and FX deals |
+| **Profile & Settings** | Change password, language switcher (EN / FR), verified links |
+| **Onboarding** | 4-screen intro carousel shown on first launch |
+| **Help Center** | Searchable help content in English and French |
+| **i18n** | Full bilingual support — English and French, switchable at runtime |
 
 ---
 
@@ -35,31 +53,67 @@
 
 ```
 mini-mobile-wallet/
-├── app/                    # Expo Router — screens & navigation
-│   ├── _layout.tsx         # Root layout (navigation shell)
-│   └── index.tsx           # Home / entry screen
+├── app/                        # Expo Router — screens & navigation
+│   ├── _layout.tsx             # Root layout (font loading, providers)
+│   ├── index.tsx               # Entry redirect
+│   ├── (auth)/                 # Unauthenticated screens
+│   │   ├── _layout.tsx
+│   │   ├── login.tsx
+│   │   └── signup.tsx
+│   └── (app)/                  # Authenticated screens (tab navigator)
+│       ├── _layout.tsx         # Bottom tab bar (Dashboard, Pay, Receive, Exchange, Profile)
+│       ├── dashboard.tsx
+│       ├── pay-now.tsx         # Send payment (lookup → form → review → PIN → success)
+│       ├── receive.tsx         # QR code + share link
+│       ├── exchange.tsx
+│       ├── profile.tsx
+│       ├── payment-history.tsx
+│       ├── convert-history.tsx
+│       ├── statement.tsx
+│       ├── get-verified.tsx
+│       ├── help.tsx
+│       ├── settings.tsx
+│       ├── change-password.tsx
+│       └── onboarding.tsx
+├── src/
+│   ├── api/                    # Axios services
+│   │   ├── client.ts           # Axios instance with auth interceptor
+│   │   ├── config.ts           # Base URLs and endpoint constants
+│   │   ├── auth.service.ts
+│   │   ├── account.service.ts
+│   │   ├── payment.service.ts
+│   │   ├── exchange.service.ts
+│   │   └── verified-link.service.ts
+│   ├── components/             # Shared UI components
+│   │   ├── CurrencyIcon.tsx
+│   │   ├── PinEntryModal.tsx
+│   │   └── SparklineChart.tsx
+│   ├── contexts/
+│   │   ├── AuthContext.tsx
+│   │   └── LanguageContext.tsx
+│   ├── lang/
+│   │   ├── english.json
+│   │   └── french.json
+│   ├── types/                  # Shared TypeScript types
+│   └── utils/
+│       ├── currencyIcons.ts
+│       ├── formatters.ts
+│       └── storage.ts          # SecureStore (tokens) + AsyncStorage (prefs)
 ├── assets/
-│   ├── fonts/              # Custom fonts
-│   └── images/             # App icons, splash screen
-├── src/                    # (to be populated — migrated from mini-wallet)
-│   ├── api/                # Axios services (shared with web)
-│   ├── contexts/           # AuthContext, LanguageContext
-│   ├── lang/               # i18n JSON (EN / FR)
-│   ├── types/              # Shared TypeScript types
-│   └── utils/              # Storage (AsyncStorage / SecureStore)
-├── app.json                # Expo config
-├── babel.config.js         # Babel (expo preset + reanimated)
-├── metro.config.js         # Metro bundler config
-├── tsconfig.json           # TypeScript config
-├── index.ts                # Entry point → expo-router/entry
+│   ├── fonts/
+│   └── images/
+├── docs/
+│   └── IMPLEMENTATION_PLAN.md
+├── app.json
+├── eas.json
+├── tsconfig.json
+├── .eslintrc.js
 └── package.json
 ```
 
 ---
 
 ## Design System / Style Guide
-
-> Reference for the companion mobile app and any future projects.
 
 ### Colors
 
@@ -89,29 +143,6 @@ mini-mobile-wallet/
 
 > Font family: System default (`-apple-system` / Roboto). Custom font support via `expo-font` is pre-configured.
 
-### Logo & Brand Assets
-
-| Asset | Path | Notes |
-|---|---|---|
-| Logo (light, PNG) | `mini-wallet/public/winstantpay-logo-light.png` | Use on dark backgrounds |
-| App Icon | `assets/images/icon.png` | 1024×1024 PNG |
-| Splash Screen | `assets/images/splash.png` | Centered, `#0a0a0a` bg |
-| Adaptive Icon | `assets/images/adaptive-icon.png` | Android only |
-
-### Component Mapping (Web → Mobile)
-
-| Web | React Native |
-|---|---|
-| `<div>` | `<View>` |
-| `<span>`, `<p>` | `<Text>` |
-| `<button>` | `<TouchableOpacity>` or `<Pressable>` |
-| `<input>` | `<TextInput>` |
-| `<ul>` / data maps | `<FlatList>` |
-| `<img>` | `<Image>` |
-| CSS file | `StyleSheet.create({})` |
-| `localStorage` | `expo-secure-store` (tokens) / `@react-native-async-storage/async-storage` (prefs) |
-| `react-router-dom` | `expo-router` (file-based, `app/` directory) |
-
 ---
 
 ## Prerequisites
@@ -133,7 +164,7 @@ mini-mobile-wallet/
 # 1. Use correct Node version
 nvm use 22
 
-# 2. Clone / enter project
+# 2. Enter project
 cd mini-mobile-wallet
 
 # 3. Install dependencies
@@ -149,14 +180,13 @@ npm install
 ```bash
 nvm use 22
 npm start
-# or: npx expo start
 ```
 
 Scan the **QR code** shown in the terminal with:
 - **Android:** Expo Go app
 - **iOS:** Camera app
 
-### Android Emulator (AVD required)
+### Android Emulator
 
 ```bash
 nvm use 22
@@ -170,12 +200,19 @@ nvm use 22
 npm run ios
 ```
 
-### Web Preview
+---
+
+## Code Quality
 
 ```bash
-nvm use 22
-npm run web
+# TypeScript compile check (zero errors required)
+npm run typecheck
+
+# ESLint (zero errors; warnings are non-blocking)
+npm run lint
 ```
+
+Both checks run against the full `src/` and `app/` tree. Fix all `typecheck` errors before committing. Lint warnings (`no-explicit-any`, `no-unused-vars`) are informational.
 
 ---
 
@@ -185,14 +222,10 @@ npm run web
 
 ```bash
 # Install EAS CLI once
-nvm use 22
 npm install -g eas-cli
 
 # Login to Expo account
 eas login
-
-# Configure project (first time)
-eas build:configure
 
 # Build Android APK (for testing / sideload)
 eas build --platform android --profile preview
@@ -202,16 +235,6 @@ eas build --platform android --profile production
 
 # Build iOS IPA
 eas build --platform ios --profile production
-```
-
-### Local Android Build (requires Android SDK)
-
-```bash
-# Install Android cmdline-tools only (no Android Studio)
-# See docs/nhotes.md for full setup guide
-
-nvm use 22
-npm run android
 ```
 
 ---
@@ -263,23 +286,6 @@ emulator -avd Pixel8 &
 # 7. Verify
 adb devices
 ```
-
----
-
-## Migration Phases
-
-This project follows a phased migration from the `mini-wallet` web app:
-
-| Phase | Status | Description |
-|---|---|---|
-| Phase 1 | ✅ Done | Environment setup (this file) |
-| Phase 2 | 🔜 Next | Architecture mapping & dependency plan |
-| Phase 3.1 | ⬜ Pending | Core utils, types, API services |
-| Phase 3.2 | ⬜ Pending | Auth & Language contexts |
-| Phase 3.3 | ⬜ Pending | Navigation shell (Expo Router) |
-| Phase 3.4 | ⬜ Pending | Screen-by-screen conversion |
-
-See [CLAUDE.md](./CLAUDE.md) for full migration instructions.
 
 ---
 

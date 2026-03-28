@@ -311,52 +311,96 @@
     },
     "help": {
         "title": "Help Center",
-        "subtitle": "Quick guidance for the main wallet flows. Update this file to maintain labels and help content in one place.",
+        "subtitle": "Quick guidance for every feature in the app.",
         "searchPlaceholder": "Search help topics...",
         "searchAria": "Search help topics",
         "noResults": "No help topics match \"{{query}}\".",
         "sections": {
             "gettingStarted": {
                 "title": "Getting Started",
-                "intro": "Use these first steps when a user opens the app for the first time.",
                 "items": {
                     "signIn": {
                         "label": "Sign in",
-                        "description": "Use your username and password on the login page. If you are new, create an account first from the sign-up page."
+                        "description": "Enter your username and password on the login screen, then tap Sign In. If you are new, tap 'Create an account' to register first."
                     },
-                    "pickTheme": {
-                        "label": "Pick a theme",
-                        "description": "Use the Light/Dark switch on login or sign-up. Your theme preference is saved automatically."
+                    "rememberMe": {
+                        "label": "Remember Me / Auto-login",
+                        "description": "Toggle 'Remember Me' on the login screen to stay signed in. The next time you open the app, it will log you in automatically without asking for your credentials again."
+                    },
+                    "signUp": {
+                        "label": "Create an account",
+                        "description": "Tap 'Create an account' on the login screen. Fill in your name, email, phone, username, and password, then tap 'Create Account'. You will be taken directly to identity verification."
                     },
                     "openDashboard": {
-                        "label": "Open dashboard",
-                        "description": "After sign in, you land on Dashboard where all balances are shown by currency account."
+                        "label": "Dashboard overview",
+                        "description": "After signing in you land on the Dashboard, which shows all your currency balances, a quick exchange widget, and recent activity."
                     }
                 }
             },
             "dashboard": {
                 "title": "Dashboard",
                 "items": {
+                    "balanceCards": {
+                        "label": "Balance cards",
+                        "description": "Each card shows one currency account with its available and reserved balance. Tap a card to open the full account statement."
+                    },
                     "hideZero": {
                         "label": "Hide zero balances",
-                        "description": "Use the checkbox in the top-right to only show accounts with non-zero available/total values."
+                        "description": "Use the 'Hide zero' toggle to show only accounts that have a non-zero balance."
+                    },
+                    "favorites": {
+                        "label": "Favorites",
+                        "description": "Tap the star icon on any balance card to mark it as a favourite. Use the 'Favourites only' toggle to show only your starred accounts."
+                    },
+                    "quickExchange": {
+                        "label": "Quick exchange",
+                        "description": "Use the currency converter widget on the Dashboard to get an indicative rate instantly without going to the Exchange screen."
                     },
                     "viewStatement": {
-                        "label": "View statement",
-                        "description": "Click any account card to open its statement with transaction history and date filters."
+                        "label": "Account statement",
+                        "description": "Tap any balance card to open its statement. Filter transactions by period using the dropdown at the top."
                     }
                 }
             },
             "payments": {
-                "title": "Pay Now",
+                "title": "Send a Payment",
                 "items": {
-                    "createPayment": {
-                        "label": "Create payment",
-                        "description": "Enter recipient PayID, amount, and currency, then continue to review before sending."
+                    "findRecipient": {
+                        "label": "Find a recipient",
+                        "description": "On the Pay screen, enter the recipient's StealthID (e.g. VL10207) and tap Search. Their name, organisation, and verified status will appear before you proceed."
+                    },
+                    "scanQR": {
+                        "label": "Scan a QR code",
+                        "description": "Tap the QR icon next to the search field to open the camera. Point it at a recipient's QR code — the app fills in their ID automatically."
+                    },
+                    "fillForm": {
+                        "label": "Enter amount and currency",
+                        "description": "Choose the currency from your available balances, enter the amount, and add an optional memo for the recipient."
                     },
                     "reviewConfirm": {
                         "label": "Review and confirm",
-                        "description": "Confirm details carefully. Once posted, payment status and reference appear in Payment History."
+                        "description": "Check all details on the review screen. If you have set a PIN, you will be asked to enter it before the payment is sent."
+                    },
+                    "paymentHistory": {
+                        "label": "Payment history",
+                        "description": "After sending, the payment appears in Payment History (Profile → History) with its reference number and status."
+                    }
+                }
+            },
+            "receive": {
+                "title": "Receive a Payment",
+                "items": {
+                    "yourQR": {
+                        "label": "Your QR code",
+                        "description": "Open the Receive tab (QR icon in the bottom navigation). Your personal QR code is displayed — others can scan it to pay you without typing your ID."
+                    },
+                    "shareLink": {
+                        "label": "Share your payment link",
+                        "description": "Tap 'Share Payment Link' to send your payment link via any app (WhatsApp, email, SMS). The recipient clicks the link and is taken directly to the payment form."
+                    },
+                    "stealthId": {
+                        "label": "Your StealthID",
+                        "description": "Your StealthID (e.g. VL10207) is shown below your QR code. Tap it to copy it to the clipboard and share it manually."
                     }
                 }
             },
@@ -364,29 +408,71 @@
                 "title": "Exchange (FX)",
                 "items": {
                     "getQuote": {
-                        "label": "Get quote",
-                        "description": "Select buy/sell currencies and amount, then request a quote."
+                        "label": "Get a quote",
+                        "description": "On the Exchange screen, select the currency you want to sell (From) and the currency you want to buy (To), enter the amount, and tap 'Get Quote'."
                     },
                     "quoteExpiry": {
                         "label": "Quote expiry",
-                        "description": "Quotes have a countdown timer. If it expires, request a new quote before booking."
+                        "description": "A quote is only valid for a short countdown. If it expires, tap 'Get New Quote' to request a fresh rate."
                     },
                     "bookDeal": {
-                        "label": "Book deal",
-                        "description": "Book the quote to complete exchange and generate references visible in Exchange History."
+                        "label": "Book the deal",
+                        "description": "Review the quote details (rate, amounts, fee) and tap 'Book Deal'. If you have a PIN set, enter it to confirm. The booked deal appears in Exchange History."
                     }
                 }
             },
             "history": {
-                "title": "History",
+                "title": "History & Statements",
                 "items": {
                     "paymentHistory": {
                         "label": "Payment History",
-                        "description": "See sent payment records with date/time, reference, parties, amount, and status."
+                        "description": "Find all sent payments under Profile → Payment History. Each entry shows the date, reference, sender, recipient, amount, and status."
                     },
                     "exchangeHistory": {
                         "label": "Exchange History",
-                        "description": "See booked FX deals, rates, conversion values, and value dates."
+                        "description": "Find all booked FX deals under Profile → Exchange History. Each entry shows the currencies, rate, amounts, deal fee, and value date."
+                    },
+                    "statement": {
+                        "label": "Account Statement",
+                        "description": "Tap any balance card on the Dashboard to open a detailed statement. Use the period filter to narrow down transactions by date range."
+                    }
+                }
+            },
+            "security": {
+                "title": "Security & PIN",
+                "items": {
+                    "setPin": {
+                        "label": "Set a PIN",
+                        "description": "Go to Profile and tap 'Set PIN'. Enter a 6-digit PIN, then confirm it. From then on, every payment and FX deal will require your PIN before it is processed."
+                    },
+                    "changePin": {
+                        "label": "Change your PIN",
+                        "description": "Go to Profile and tap 'Change PIN'. Enter your new 6-digit PIN and confirm it."
+                    },
+                    "pinProtection": {
+                        "label": "What is PIN-protected?",
+                        "description": "Once a PIN is set, it is required to send a payment and to book an FX deal. This prevents unauthorised transactions if your phone is unlocked."
+                    }
+                }
+            },
+            "profile": {
+                "title": "Profile & Settings",
+                "items": {
+                    "changePassword": {
+                        "label": "Change password",
+                        "description": "Go to Profile → Change Password. Enter your current password and then your new password twice. Tap 'Change Password' to save."
+                    },
+                    "language": {
+                        "label": "Change language",
+                        "description": "Go to Profile → Settings and tap the current language. Select English or French from the list. The entire app switches language immediately."
+                    },
+                    "getVerified": {
+                        "label": "Identity verification (KYC)",
+                        "description": "Go to Profile → Get Verified to complete identity verification. Upload your ID document, take a selfie, and confirm your details. A verification link is generated for you to share."
+                    },
+                    "logout": {
+                        "label": "Sign out",
+                        "description": "Tap 'Log Out' in the Profile screen. If Remember Me was on, your credentials are cleared and you will need to sign in again next time."
                     }
                 }
             },
@@ -395,15 +481,19 @@
                 "items": {
                     "cantSignIn": {
                         "label": "Can't sign in",
-                        "description": "Check username/password carefully and verify API availability. Try again after a few seconds."
+                        "description": "Check your username and password carefully — they are case-sensitive. If the problem persists, try switching the Environment selector on the login screen."
                     },
-                    "pageNotFound": {
-                        "label": "Page not found after deploy",
-                        "description": "Ensure staticwebapp.config.json exists in the deployed artifact for SPA route fallback."
+                    "paymentFailed": {
+                        "label": "Payment failed",
+                        "description": "Ensure you have sufficient available balance in the selected currency. Check that the recipient's StealthID is correct and that their account is active."
                     },
-                    "themeLogoWrong": {
-                        "label": "Theme/logo looks wrong",
-                        "description": "Toggle theme once and refresh. The app saves theme under local storage key app_theme."
+                    "qrNotScanning": {
+                        "label": "QR code not scanning",
+                        "description": "Make sure the app has camera permission (check your phone's settings). Hold the camera steady and ensure the QR code is fully within the frame."
+                    },
+                    "pinForgotten": {
+                        "label": "Forgot PIN",
+                        "description": "Tap 'Forgot PIN?' on the PIN entry screen. You will be prompted to verify your identity and can then set a new PIN from your Profile."
                     }
                 }
             }

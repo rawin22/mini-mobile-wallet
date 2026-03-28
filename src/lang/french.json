@@ -311,52 +311,96 @@
     },
     "help": {
         "title": "Centre d'aide",
-        "subtitle": "Guide rapide des principaux parcours du portefeuille. Mettez à jour ce fichier pour maintenir les libellés et le contenu d'aide au même endroit.",
+        "subtitle": "Guide rapide de toutes les fonctionnalités de l'application.",
         "searchPlaceholder": "Rechercher des sujets d'aide...",
         "searchAria": "Rechercher des sujets d'aide",
         "noResults": "Aucun sujet d'aide ne correspond à \"{{query}}\".",
         "sections": {
             "gettingStarted": {
                 "title": "Démarrage",
-                "intro": "Utilisez ces premières étapes lorsqu'un utilisateur ouvre l'application pour la première fois.",
                 "items": {
                     "signIn": {
                         "label": "Se connecter",
-                        "description": "Utilisez votre nom d'utilisateur et votre mot de passe sur la page de connexion. Si vous êtes nouveau, créez d'abord un compte depuis la page d'inscription."
+                        "description": "Saisissez votre nom d'utilisateur et votre mot de passe sur l'écran de connexion, puis appuyez sur Se connecter. Si vous êtes nouveau, appuyez sur « Créer un compte » pour vous inscrire d'abord."
                     },
-                    "pickTheme": {
-                        "label": "Choisir un thème",
-                        "description": "Utilisez le switch Clair/Sombre sur la connexion ou l'inscription. Votre préférence de thème est enregistrée automatiquement."
+                    "rememberMe": {
+                        "label": "Se souvenir de moi / Connexion automatique",
+                        "description": "Activez « Se souvenir de moi » sur l'écran de connexion pour rester connecté. La prochaine fois que vous ouvrez l'application, elle vous connectera automatiquement sans vous redemander vos identifiants."
+                    },
+                    "signUp": {
+                        "label": "Créer un compte",
+                        "description": "Appuyez sur « Créer un compte » sur l'écran de connexion. Renseignez votre nom, e-mail, téléphone, nom d'utilisateur et mot de passe, puis appuyez sur « Créer le compte ». Vous serez dirigé directement vers la vérification d'identité."
                     },
                     "openDashboard": {
-                        "label": "Ouvrir le tableau de bord",
-                        "description": "Après connexion, vous arrivez sur le Tableau de bord où tous les soldes sont affichés par compte de devise."
+                        "label": "Aperçu du tableau de bord",
+                        "description": "Après connexion, vous arrivez sur le Tableau de bord, qui affiche tous vos soldes en devises, un widget de change rapide et les activités récentes."
                     }
                 }
             },
             "dashboard": {
                 "title": "Tableau de bord",
                 "items": {
+                    "balanceCards": {
+                        "label": "Cartes de solde",
+                        "description": "Chaque carte affiche un compte en devise avec son solde disponible et réservé. Appuyez sur une carte pour ouvrir le relevé complet."
+                    },
                     "hideZero": {
                         "label": "Masquer les soldes à zéro",
-                        "description": "Utilisez la case en haut à droite pour n'afficher que les comptes avec des valeurs disponibles/totales non nulles."
+                        "description": "Utilisez le toggle « Masquer zéro » pour n'afficher que les comptes avec un solde non nul."
+                    },
+                    "favorites": {
+                        "label": "Favoris",
+                        "description": "Appuyez sur l'étoile d'une carte de solde pour la marquer comme favori. Utilisez le toggle « Favoris uniquement » pour n'afficher que vos comptes étoilés."
+                    },
+                    "quickExchange": {
+                        "label": "Change rapide",
+                        "description": "Utilisez le widget de conversion de devises sur le Tableau de bord pour obtenir un taux indicatif instantanément sans aller sur l'écran Change."
                     },
                     "viewStatement": {
-                        "label": "Voir le relevé",
-                        "description": "Cliquez sur une carte de compte pour ouvrir son relevé avec l'historique des transactions et les filtres de date."
+                        "label": "Relevé de compte",
+                        "description": "Appuyez sur une carte de solde pour ouvrir son relevé. Filtrez les transactions par période grâce au menu déroulant en haut."
                     }
                 }
             },
             "payments": {
-                "title": "Payer maintenant",
+                "title": "Envoyer un paiement",
                 "items": {
-                    "createPayment": {
-                        "label": "Créer un paiement",
-                        "description": "Saisissez le PayID du destinataire, le montant et la devise, puis passez à la vérification avant l'envoi."
+                    "findRecipient": {
+                        "label": "Trouver un destinataire",
+                        "description": "Sur l'écran Payer, saisissez le StealthID du destinataire (ex. VL10207) et appuyez sur Rechercher. Son nom, son organisation et son statut vérifié s'affichent avant de continuer."
+                    },
+                    "scanQR": {
+                        "label": "Scanner un code QR",
+                        "description": "Appuyez sur l'icône QR à côté du champ de recherche pour ouvrir l'appareil photo. Pointez-le sur le code QR du destinataire — l'application renseigne son identifiant automatiquement."
+                    },
+                    "fillForm": {
+                        "label": "Saisir le montant et la devise",
+                        "description": "Choisissez la devise parmi vos soldes disponibles, saisissez le montant et ajoutez un mémo optionnel pour le destinataire."
                     },
                     "reviewConfirm": {
                         "label": "Vérifier et confirmer",
-                        "description": "Vérifiez soigneusement les détails. Une fois publié, le statut du paiement et la référence apparaissent dans l'Historique des paiements."
+                        "description": "Vérifiez tous les détails sur l'écran de révision. Si vous avez défini un PIN, il vous sera demandé avant l'envoi du paiement."
+                    },
+                    "paymentHistory": {
+                        "label": "Historique des paiements",
+                        "description": "Après l'envoi, le paiement apparaît dans l'Historique des paiements (Profil → Historique) avec son numéro de référence et son statut."
+                    }
+                }
+            },
+            "receive": {
+                "title": "Recevoir un paiement",
+                "items": {
+                    "yourQR": {
+                        "label": "Votre code QR",
+                        "description": "Ouvrez l'onglet Recevoir (icône QR dans la navigation du bas). Votre code QR personnel s'affiche — les autres peuvent le scanner pour vous payer sans taper votre identifiant."
+                    },
+                    "shareLink": {
+                        "label": "Partager votre lien de paiement",
+                        "description": "Appuyez sur « Partager le lien de paiement » pour l'envoyer via n'importe quelle application (WhatsApp, e-mail, SMS). Le destinataire clique sur le lien et accède directement au formulaire de paiement."
+                    },
+                    "stealthId": {
+                        "label": "Votre StealthID",
+                        "description": "Votre StealthID (ex. VL10207) s'affiche sous votre code QR. Appuyez dessus pour le copier dans le presse-papiers et le partager manuellement."
                     }
                 }
             },
@@ -365,28 +409,70 @@
                 "items": {
                     "getQuote": {
                         "label": "Obtenir un cours",
-                        "description": "Sélectionnez les devises d'achat/vente et le montant, puis demandez un cours."
+                        "description": "Sur l'écran Change, sélectionnez la devise à vendre (De) et la devise à acheter (Vers), saisissez le montant, puis appuyez sur « Obtenir un cours »."
                     },
                     "quoteExpiry": {
                         "label": "Expiration du cours",
-                        "description": "Les cours ont un compte à rebours. S'il expire, demandez un nouveau cours avant de valider."
+                        "description": "Un cours n'est valable que pendant un court compte à rebours. S'il expire, appuyez sur « Nouveau cours » pour demander un taux actualisé."
                     },
                     "bookDeal": {
                         "label": "Valider l'opération",
-                        "description": "Validez le cours pour terminer le change et générer des références visibles dans l'Historique des changes."
+                        "description": "Vérifiez les détails du cours (taux, montants, frais) et appuyez sur « Valider ». Si vous avez un PIN, saisissez-le pour confirmer. L'opération validée apparaît dans l'Historique des changes."
                     }
                 }
             },
             "history": {
-                "title": "Historique",
+                "title": "Historique et relevés",
                 "items": {
                     "paymentHistory": {
                         "label": "Historique des paiements",
-                        "description": "Consultez les paiements envoyés avec date/heure, référence, parties, montant et statut."
+                        "description": "Retrouvez tous les paiements envoyés sous Profil → Historique des paiements. Chaque entrée affiche la date, la référence, l'expéditeur, le destinataire, le montant et le statut."
                     },
                     "exchangeHistory": {
                         "label": "Historique des changes",
-                        "description": "Consultez les opérations FX validées, les taux, les valeurs de conversion et les dates de valeur."
+                        "description": "Retrouvez toutes les opérations FX validées sous Profil → Historique des changes. Chaque entrée affiche les devises, le taux, les montants, les frais et la date de valeur."
+                    },
+                    "statement": {
+                        "label": "Relevé de compte",
+                        "description": "Appuyez sur une carte de solde du Tableau de bord pour ouvrir un relevé détaillé. Utilisez le filtre de période pour affiner les transactions par plage de dates."
+                    }
+                }
+            },
+            "security": {
+                "title": "Sécurité et PIN",
+                "items": {
+                    "setPin": {
+                        "label": "Définir un PIN",
+                        "description": "Allez dans Profil et appuyez sur « Définir le PIN ». Saisissez un PIN à 6 chiffres, puis confirmez-le. Désormais, chaque paiement et opération FX nécessitera votre PIN avant d'être traité."
+                    },
+                    "changePin": {
+                        "label": "Changer votre PIN",
+                        "description": "Allez dans Profil et appuyez sur « Changer le PIN ». Saisissez votre nouveau PIN à 6 chiffres et confirmez-le."
+                    },
+                    "pinProtection": {
+                        "label": "Qu'est-ce qui est protégé par PIN ?",
+                        "description": "Une fois un PIN défini, il est requis pour envoyer un paiement et valider une opération FX. Cela empêche les transactions non autorisées si votre téléphone est déverrouillé."
+                    }
+                }
+            },
+            "profile": {
+                "title": "Profil et paramètres",
+                "items": {
+                    "changePassword": {
+                        "label": "Changer le mot de passe",
+                        "description": "Allez dans Profil → Changer le mot de passe. Saisissez votre mot de passe actuel, puis le nouveau deux fois. Appuyez sur « Changer le mot de passe » pour enregistrer."
+                    },
+                    "language": {
+                        "label": "Changer de langue",
+                        "description": "Allez dans Profil → Paramètres et appuyez sur la langue actuelle. Sélectionnez Anglais ou Français dans la liste. L'application entière change de langue immédiatement."
+                    },
+                    "getVerified": {
+                        "label": "Vérification d'identité (KYC)",
+                        "description": "Allez dans Profil → Se faire vérifier pour compléter la vérification d'identité. Téléchargez votre pièce d'identité, prenez un selfie et confirmez vos informations. Un lien de vérification est généré pour vous."
+                    },
+                    "logout": {
+                        "label": "Se déconnecter",
+                        "description": "Appuyez sur « Déconnexion » dans l'écran Profil. Si Se souvenir de moi était activé, vos identifiants sont effacés et vous devrez vous reconnecter la prochaine fois."
                     }
                 }
             },
@@ -395,15 +481,19 @@
                 "items": {
                     "cantSignIn": {
                         "label": "Impossible de se connecter",
-                        "description": "Vérifiez soigneusement le nom d'utilisateur/mot de passe et la disponibilité de l'API. Réessayez après quelques secondes."
+                        "description": "Vérifiez soigneusement votre nom d'utilisateur et mot de passe — ils sont sensibles à la casse. Si le problème persiste, essayez de changer le sélecteur d'environnement sur l'écran de connexion."
                     },
-                    "pageNotFound": {
-                        "label": "Page introuvable après déploiement",
-                        "description": "Assurez-vous que staticwebapp.config.json existe dans l'artefact déployé pour le fallback des routes SPA."
+                    "paymentFailed": {
+                        "label": "Paiement échoué",
+                        "description": "Assurez-vous d'avoir un solde disponible suffisant dans la devise sélectionnée. Vérifiez que le StealthID du destinataire est correct et que son compte est actif."
                     },
-                    "themeLogoWrong": {
-                        "label": "Thème/logo incorrect",
-                        "description": "Basculez le thème une fois puis rafraîchissez. L'application enregistre le thème avec la clé locale app_theme."
+                    "qrNotScanning": {
+                        "label": "Code QR non scanné",
+                        "description": "Vérifiez que l'application a la permission d'accéder à l'appareil photo (dans les paramètres de votre téléphone). Tenez l'appareil photo stable et assurez-vous que le code QR est entièrement dans le cadre."
+                    },
+                    "pinForgotten": {
+                        "label": "PIN oublié",
+                        "description": "Appuyez sur « PIN oublié ? » sur l'écran de saisie du PIN. Vous serez invité à vérifier votre identité et pourrez ensuite définir un nouveau PIN depuis votre Profil."
                     }
                 }
             }
